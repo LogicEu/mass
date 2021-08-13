@@ -1,6 +1,6 @@
 #!/bin/bash
 
-name=libmass
+name=libfract
 
 flags=(
     -std=c99
@@ -11,14 +11,6 @@ flags=(
 
 inc=(
     -I.
-    -Ifract/
-    -Iutopia/
-)
-
-lib=(
-    -Llib/
-    -lfract
-    -lutopia
 )
 
 fail_op() {
@@ -40,19 +32,6 @@ linux_dlib() {
     gcc -shared ${flags[*]} ${inc[*]} ${lib[*]} -lm -fPIC src/*.c -o $name.so 
 }
 
-lib_build() {
-    pushd $1/
-    ./build.sh $2
-    popd
-    mv $1/lib$1.a lib/lib$1.a
-}
-
-build() {
-    mkdir lib/
-    lib_build fract -s
-    lib_build utopia -slib
-}
-
 dlib() {
     if echo "$OSTYPE" | grep -q "darwin"; then
         mac_dlib
@@ -69,22 +48,12 @@ slib() {
     rm *.o
 }
 
-clean() {
-    rm -r lib/
-}
-
 if [[ $# < 1 ]]; then 
     fail_op
-elif [[ "$1" == "-build" ]]; then
-    build
 elif [[ "$1" == "-d" ]]; then
-    build
     dlib
-    clean
 elif [[ "$1" == "-s" ]]; then
     slib
-elif [[ "$1" == "-clean" ]]; then
-    clean
 else
     fail_op
 fi 
