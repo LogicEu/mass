@@ -11,8 +11,7 @@ flags=(
 
 inc=(
     -I.
-    -Ifract/
-    -Iutopia/
+    -Iinclude/
 )
 
 lib=(
