@@ -19,7 +19,7 @@ handling 3D data models and files.
 */
 
 #include <fract.h>
-#include <Utopia.h>
+#include <utopia.h>
 
 typedef enum {
     OBJ_V,
