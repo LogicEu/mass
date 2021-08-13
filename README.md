@@ -1,3 +1,3 @@
 # mass
 >
-> Library ro handle meshes and 3D models
+> Library to handle meshes and 3D models

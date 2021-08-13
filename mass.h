@@ -18,7 +18,7 @@ handling 3D data models and files.
 
 */
 
-#include <libfract.h>
+#include <fract.h>
 #include <Utopia.h>
 
 typedef enum {

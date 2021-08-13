@@ -11,7 +11,7 @@ flags=(
 
 inc=(
     -I.
-    -Ilibfract/
+    -Ifract/
     -Iutopia/
 )
 
@@ -40,17 +40,17 @@ linux_dlib() {
     gcc -shared ${flags[*]} ${inc[*]} ${lib[*]} -lm -fPIC src/*.c -o $name.so 
 }
 
-build() {
-    pushd libfract/
-    ./build.sh -s
+lib_build() {
+    pushd $1/
+    ./build.sh $2
     popd
-    pushd utopia/
-    ./build.sh -slib
-    popd
+    mv $1/lib$1.a lib/lib$1.a
+}
 
+build() {
     mkdir lib/
-    mv libfract/libfract.a lib/libfract.a
-    mv utopia/libutopia.a lib/libutopia.a
+    lib_build fract -s
+    lib_build utopia -slib
 }
 
 dlib() {
