@@ -53,6 +53,29 @@ typedef struct {
     float data[4][4];
 } mat4;
 
+#define _vec3_new(x, y, z) {x, y, z}
+#define _vec3_uni(f) {f, f, f}
+
+#define _vec3_cmp(a, b) (a.x == b.x && a.y == b.y && a.z == b.z)
+#define _vec3_unicmp(v, f) (v.x == f && v.y == f && v.z == f)
+
+#define _vec3_op(a, op, b) _vec3_new(a.x op b.x, a.y op b.y, a.z op b.z)
+#define _vec3_fop(v, fop, f) _vec3_new(v.x fop f, v.y fop f, v.z fop f)
+
+#define _vec3_add(a, b) _vec3_op(a, +, b)
+#define _vec3_sub(a, b) _vec3_op(a, -, b)
+#define _vec3_prod(a, b) _vec3_op(a, *, b)
+
+#define _vec3_mult(v, f) _vec3_fop(v, *, f)
+#define _vec3_div(v, f) _vec3_fop(v, /, f)
+#define _vec3_neg(v) _vec3_new(-v.x, -v.y, -v.z)
+
+#define _vec3_dot(a, b) (a.x * b.x + a.y * b.y + a.z * b.z)
+#define _vec3_sqmag(v) _vec3_dot(v, v)
+#define _vec3_mag(v) sqrtf(_vec3_sqmag(v))
+#define _vec3_normal(v) _vec3_mult(v, 1.0 / _vec3_mag(v))
+#define _vec3_cross(a, b) {a.y * b.z - b.y * a.z, a.z * b.x - b.z * a.x, a.x * b.y - b.x * a.y}
+
 /*
 -----------------------------------
  -> Math Utilities and Functions <- 
