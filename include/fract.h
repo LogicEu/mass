@@ -68,11 +68,13 @@ unsigned int rand_uint(unsigned int num);
 unsigned int rand_num();
 unsigned int rand_next();
 float randf_norm();
+float randf_signed();
 
 /********************************************
  -> floating point functions and utilities <- 
 ********************************************/
 
+float absf(float f);
 float signf(float f);
 float minf(float a, float b);
 float maxf(float a, float b);
