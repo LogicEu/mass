@@ -53,28 +53,66 @@ typedef struct {
     float data[4][4];
 } mat4;
 
+#define _absf(f) (((f) >= 0.0) - (f) * (float)((f) < 0.0))
+#define _signf(f) (((f) >= 0.0) - ((f) < 0.0))
+#define _minf(a, b) ((a) * (float)((a) <= (b)) + (b) * (float)((b) < (a)))
+#define _maxf(a, b) ((a) * (float)((a) >= (b)) + (b) * (float)((b) > (a)))
+#define _lerpf(a, b, t) (((a) * (1.0 - (t))) + ((b) * (t)))
+#define _smooth_lerpf(a, b, t) _lerpf(a, b, t * t * (3 - 2 * t))
+#define _inverse_lerpf(a, v, val) (((val) - (a)) / ((b) - (a)))
+
+#define _vec2_new(x, y) {x, y}
+#define _vec2_uni(f) {f, f}
+#define _vec2_cmp(a, b) (a.x == b.x && a.y == b.y)
+#define _vec2_unicmp(v, f) (v.x == f && v.y == f)
+#define _vec2_op(a, op, b) _vec2_new(a.x op b.x, a.y op b.y)
+#define _vec2_fop(v, fop, f) _vec2_new(v.x fop f, v.y fop f)
+#define _vec2_add(a, b) _vec2_op(a, +, b)
+#define _vec2_sub(a, b) _vec2_op(a, -, b)
+#define _vec2_prod(a, b) _vec2_op(a, *, b)
+#define _vec2_mult(v, f) _vec2_fop(v, *, f)
+#define _vec2_div(v, f) _vec2_fop(v, /, f)
+#define _vec2_neg(v) _vec2_new(-v.x, -v.y)
+#define _vec2_dot(a, b) (a.x * b.x + a.y * b.y)
+#define _vec2_sqmag(v) _vec2_dot(v, v)
+#define _vec2_mag(v) sqrtf(_vec2_sqmag(v))
+#define _vec2_normal(v) _vec2_mult(v, 1.0 / _vec2_mag(v))
+#define _vec2_cross(a, b) {a.y - b.y, a.x - b.x};
+
 #define _vec3_new(x, y, z) {x, y, z}
 #define _vec3_uni(f) {f, f, f}
-
 #define _vec3_cmp(a, b) (a.x == b.x && a.y == b.y && a.z == b.z)
 #define _vec3_unicmp(v, f) (v.x == f && v.y == f && v.z == f)
-
 #define _vec3_op(a, op, b) _vec3_new(a.x op b.x, a.y op b.y, a.z op b.z)
 #define _vec3_fop(v, fop, f) _vec3_new(v.x fop f, v.y fop f, v.z fop f)
-
 #define _vec3_add(a, b) _vec3_op(a, +, b)
 #define _vec3_sub(a, b) _vec3_op(a, -, b)
 #define _vec3_prod(a, b) _vec3_op(a, *, b)
-
 #define _vec3_mult(v, f) _vec3_fop(v, *, f)
 #define _vec3_div(v, f) _vec3_fop(v, /, f)
 #define _vec3_neg(v) _vec3_new(-v.x, -v.y, -v.z)
-
 #define _vec3_dot(a, b) (a.x * b.x + a.y * b.y + a.z * b.z)
 #define _vec3_sqmag(v) _vec3_dot(v, v)
 #define _vec3_mag(v) sqrtf(_vec3_sqmag(v))
 #define _vec3_normal(v) _vec3_mult(v, 1.0 / _vec3_mag(v))
 #define _vec3_cross(a, b) {a.y * b.z - b.y * a.z, a.z * b.x - b.z * a.x, a.x * b.y - b.x * a.y}
+
+#define _vec4_new(x, y, z, w) {x, y, z, w}
+#define _vec4_uni(f) {f, f, f, f}
+#define _vec4_cmp(a, b) (a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w)
+#define _vec4_unicmp(v, f) (v.x == f && v.y == f && v.z == f && v.w == f)
+#define _vec4_op(a, op, b) _vec4_new(a.x op b.x, a.y op b.y, a.z op b.z, a.w op b.w)
+#define _vec4_fop(v, fop, f) _vec4_new(v.x fop f, v.y fop f, v.z fop f, v.w fop f)
+#define _vec4_add(a, b) _vec4_op(a, +, b)
+#define _vec4_sub(a, b) _vec4_op(a, -, b)
+#define _vec4_prod(a, b) _vec4_op(a, *, b)
+#define _vec4_mult(v, f) _vec4_fop(v, *, f)
+#define _vec4_div(v, f) _vec4_fop(v, /, f)
+#define _vec4_neg(v) _vec4_new(-v.x, -v.y, -v.z)
+#define _vec4_dot(a, b) (a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w)
+#define _vec4_sqmag(v) _vec4_dot(v, v)
+#define _vec4_mag(v) sqrtf(_vec4_sqmag(v))
+#define _vec4_normal(v) _vec4_mult(v, 1.0 / _vec4_mag(v))
 
 /*
 -----------------------------------
