@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cc=gcc
+src=src/*.c
 name=libmass
 
 flags=(
@@ -31,19 +33,16 @@ fail_os() {
 }
 
 mac_dlib() {
-    gcc ${flags[*]} ${inc[*]} ${lib[*]} -dynamiclib src/*.c -o $name.dylib
+    $cc ${flags[*]} ${inc[*]} ${lib[*]} -dynamiclib $src -o $name.dylib &&\
     install_name_tool -id @executable_path/$name.dylib $name.dylib 
 }
 
 linux_dlib() {
-    gcc -shared ${flags[*]} ${inc[*]} ${lib[*]} -lm -fPIC src/*.c -o $name.so 
+    $cc -shared ${flags[*]} ${inc[*]} ${lib[*]} -lm -fPIC $src -o $name.so 
 }
 
 lib_build() {
-    pushd $1/
-    ./build.sh $2
-    popd
-    mv $1/lib$1.a lib/lib$1.a
+    pushd $1/ && ./build.sh $2 && popd && mv $1/lib$1.a lib/lib$1.a
 }
 
 build() {
@@ -63,27 +62,22 @@ dlib() {
 }
 
 slib() {
-    gcc ${flags[*]} ${inc[*]} -c src/*.c
-    ar -crv $name.a *.o
-    rm *.o
+    $cc ${flags[*]} ${inc[*]} -c $src && ar -crv $name.a *.o && rm *.o
 }
 
 clean() {
     rm -r lib/
 }
 
-if [[ $# < 1 ]]; then 
-    fail_op
-elif [[ "$1" == "-build" ]]; then
-    build
-elif [[ "$1" == "-d" ]]; then
-    build
-    dlib
-    clean
-elif [[ "$1" == "-s" ]]; then
-    slib
-elif [[ "$1" == "-clean" ]]; then
-    clean
-else
-    fail_op
-fi 
+case "$1" in
+    "-build")
+        build;;
+    "-d")
+        build && dlib;;
+    "-s")
+        slib;;
+    "-clean")
+        clean;;
+    *)
+        fail_op;;
+esac
