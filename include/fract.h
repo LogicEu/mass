@@ -53,10 +53,10 @@ typedef struct {
     float data[4][4];
 } mat4;
 
-#define _absf(f) (((f) >= 0.0) - (f) * (float)((f) < 0.0))
+#define _absf(f) ((f) * ((f) >= 0.0) - (f) * ((f) < 0.0))
 #define _signf(f) (((f) >= 0.0) - ((f) < 0.0))
-#define _minf(a, b) ((a) * (float)((a) <= (b)) + (b) * (float)((b) < (a)))
-#define _maxf(a, b) ((a) * (float)((a) >= (b)) + (b) * (float)((b) > (a)))
+#define _minf(a, b) ((a) * ((a) <= (b)) + (b) * ((b) < (a)))
+#define _maxf(a, b) ((a) * ((a) >= (b)) + (b) * ((b) > (a)))
 #define _lerpf(a, b, t) (((a) * (1.0 - (t))) + ((b) * (t)))
 #define _smooth_lerpf(a, b, t) _lerpf(a, b, t * t * (3 - 2 * t))
 #define _inverse_lerpf(a, v, val) (((val) - (a)) / ((b) - (a)))
