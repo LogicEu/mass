@@ -45,11 +45,6 @@ typedef struct {
     obj_flag type;
 } vmesh_t;
 
-typedef struct {
-    unsigned int id, size;
-    mesh_t* mesh;
-} model_t;
-
 /*
 ------------------------------------
  -> Wavefront OBJ File Format I/O <- 
@@ -130,15 +125,6 @@ void vmesh_height_color_gradient(vmesh_t* mesh);
 void vmesh_free(vmesh_t* mesh);
 vmesh_t* vmesh_load(const char* path);
 vmesh_t* vmesh_load_optim(const char* path);
-
-/*
---------------------------
- -> 3D Mesh of Vectors <- 
---------------------------
-*/
-
-model_t* model_load(const char* path);
-void model_free(model_t* model);
 
 /*
 -------------------------------
