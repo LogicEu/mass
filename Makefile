@@ -29,8 +29,6 @@ endif
 static: $(SRC)
 	$(CC) $(CFLAGS) -c $(SRC) && ar -crv $(NAME).a *.o && rm *.o
 
-# shared
-
 $(LDIR): 
 	mkdir $(LDIR)
 
