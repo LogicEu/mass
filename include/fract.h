@@ -138,7 +138,7 @@ float perlin2d(float x, float y, float freq, int depth, int seed);
 #define _vec2_sqmag(v) _vec2_dot(v, v)
 #define _vec2_mag(v) sqrtf(_vec2_sqmag(v))
 #define _vec2_normal(v) _vec2_mult(v, 1.0 / _vec2_mag(v))
-#define _vec2_cross(a, b) {a.y - b.y, a.x - b.x};
+#define _vec2_cross(a, b) {-(a.y - b.y), a.x - b.x};
 
 vec2 vec2_uni(float f);
 vec2 vec2_new(float x, float y);
