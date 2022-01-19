@@ -116,6 +116,7 @@ void vmesh_combine(vmesh_t* m1, vmesh_t* m2);
 void vmesh_scale(vmesh_t* mesh, float f);
 void vmesh_move(vmesh_t* mesh, vec3 add);
 vmesh_t* vmesh_shape_cube(const unsigned int size);
+vmesh_t* vmesh_shape_hex(const vec3 size);
 void vmesh_normalize_positions(vmesh_t* mesh);
 vmesh_t* vmesh_shape_sphere(unsigned int size);
 void vmesh_smooth_optim(vmesh_t** m);
