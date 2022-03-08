@@ -13,7 +13,8 @@ flags=(
 
 inc=(
     -I.
-    -Iinclude/
+    -Iutopia/
+    -Ifract/
 )
 
 lib=(
@@ -33,8 +34,7 @@ fail_os() {
 }
 
 mac_dlib() {
-    $cc ${flags[*]} ${inc[*]} ${lib[*]} -dynamiclib $src -o $name.dylib &&\
-    install_name_tool -id @executable_path/$name.dylib $name.dylib 
+    $cc ${flags[*]} ${inc[*]} ${lib[*]} -dynamiclib $src -o $name.dylib 
 }
 
 linux_dlib() {
@@ -65,8 +65,15 @@ slib() {
     $cc ${flags[*]} ${inc[*]} -c $src && ar -crv $name.a *.o && rm *.o
 }
 
+cleanf() {
+    [ -f $1 ] && rm $1
+}
+
 clean() {
-    rm -r lib/
+    cleanf $name.dylib
+    cleanf $name.so
+    cleanf $name.a
+    [ -d lib ] && rm -r lib
 }
 
 case "$1" in

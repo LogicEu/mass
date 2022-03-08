@@ -3,7 +3,7 @@
 STD=-std=c99
 WFLAGS=-Wall -Wextra
 OPT=-O2
-IDIR=-I. -Iinclude/
+IDIR=-I.
 CC=gcc
 NAME=libmass
 SRC=src/*.c
@@ -14,6 +14,7 @@ LSTATIC=$(patsubst %,lib%.a,$(LIBS))
 LPATHS=$(patsubst %,$(LDIR)/%,$(LSTATIC))
 LFLAGS=$(patsubst %,-L%,$(LDIR))
 LFLAGS += $(patsubst %,-l%,$(LIBS))
+IDIR += $(patsubst %,-I%,$(LIBS))
 
 CFLAGS=$(STD) $(WFLAGS) $(OPT) $(IDIR)
 OS=$(shell uname -s)
@@ -27,7 +28,7 @@ else
 endif
 
 static: $(SRC)
-	$(CC) $(CFLAGS) -c $(SRC) && ar -crv $(NAME).a *.o && rm *.o
+	$(CC) $(CFLAGS) -c $^ && ar -crv $(NAME).a *.o && rm *.o
 
 $(LDIR): 
 	mkdir $(LDIR)
@@ -42,4 +43,4 @@ shared: $(SRC) $(LPATHS)
 	$(CC) -o $(LIB) $(SRC) $(CFLAGS) $(LFLAGS) $(OSFLAGS)
 
 clean:
-	rm -r $(LDIR)
+	./build.sh -clean
