@@ -9,7 +9,7 @@ extern "C" {
 >>>>>>>>>>>>>>>  FRACT MATH LIBRARY   >>>>>>>>>>>>>>>>>
 Math library for game development fully compatible with
 OpenGL. Supports main vector and matrix operations.
-=========================================== @LogicEu */
+================================= Eugenio Arteaga A. */
 
 #include <math.h>
 #ifndef M_PI
