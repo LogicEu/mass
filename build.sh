@@ -12,9 +12,8 @@ flags=(
 )
 
 inc=(
-    -I.
-    -Iutopia/
-    -Ifract/
+    -I./
+    -Iinclude/
 )
 
 lib=(
@@ -66,14 +65,22 @@ slib() {
 }
 
 cleanf() {
-    [ -f $1 ] && rm $1
+    if [ -f $1 ]; then
+        rm $1
+    fi
+}
+
+cleand() {
+    if [ -d $1 ]; then
+        rm -r $1
+    fi
 }
 
 clean() {
     cleanf $name.dylib
     cleanf $name.so
     cleanf $name.a
-    [ -d lib ] && rm -r lib
+    cleand lib
 }
 
 case "$1" in

@@ -3,7 +3,7 @@
 STD=-std=c99
 WFLAGS=-Wall -Wextra
 OPT=-O2
-IDIR=-I.
+IDIR=-I. -Iinclude/
 CC=gcc
 NAME=libmass
 SRC=src/*.c
@@ -14,7 +14,6 @@ LSTATIC=$(patsubst %,lib%.a,$(LIBS))
 LPATHS=$(patsubst %,$(LDIR)/%,$(LSTATIC))
 LFLAGS=$(patsubst %,-L%,$(LDIR))
 LFLAGS += $(patsubst %,-l%,$(LIBS))
-IDIR += $(patsubst %,-I%,$(LIBS))
 
 CFLAGS=$(STD) $(WFLAGS) $(OPT) $(IDIR)
 OS=$(shell uname -s)
