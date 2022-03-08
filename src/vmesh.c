@@ -23,6 +23,7 @@ vmesh_t* vmesh_shape_plane(const unsigned int width, const unsigned int height)
     mesh->vertices = array_new(width * height * 6, sizeof(vertex_t));
     mesh->indices = array_new(width * height * 6, sizeof(unsigned int));
     vertex_array_push_plane_z(mesh, width, height);
+    vmesh_move(mesh, vec3_new(-(float)width * 0.5, 0.0, -(float)height * 0.5));
     return mesh;
 }
 
@@ -76,7 +77,29 @@ vmesh_t* vmesh_shape_cube(const unsigned int size)
     array_cut(mesh->indices);
     array_cut(mesh->vertices);
 
-    vmesh_move(mesh, vec3_uni(-(float)size / 2.0f));
+    vmesh_move(mesh, vec3_uni(-(float)size * 0.5f));
+    vertex_array_set_face_normal(mesh->vertices, mesh->indices);
+    return mesh;
+}
+
+vmesh_t* vmesh_shape_hex(const vec3 size)
+{
+    vmesh_t* mesh = (vmesh_t*)malloc(sizeof(vmesh_t));
+    mesh->type = OBJ_VN;
+    mesh->vertices = array_new(36, sizeof(vertex_t));
+    mesh->indices = array_new(36, sizeof(unsigned int));
+
+    vertex_array_push_plane_xyz(mesh, 1, 1, vec3_new(0.0f, size.y, 0.0f), vec3_new(size.x, 0.0f, 0.0f), vec3_new(0.0f, 0.0f, size.z)); //Up
+    vertex_array_push_plane_xyz(mesh, 1, 1, vec3_new(0.0f, 0.0f, 0.0f), vec3_new(0.0f, 0.0f, size.z), vec3_new(size.x, 0.0f, 0.0f)); //Down
+    vertex_array_push_plane_xyz(mesh, 1, 1, vec3_new(0.0f, 0.0f, 0.0f), vec3_new(size.x, 0.0f, 0.0f), vec3_new(0.0f, size.y, 0.0f)); //Front
+    vertex_array_push_plane_xyz(mesh, 1, 1, vec3_new(0.0f, 0.0f, size.z), vec3_new(0.0f, size.y, 0.0f), vec3_new(size.x, 0.0f, 0.0f)); //Back
+    vertex_array_push_plane_xyz(mesh, 1, 1, vec3_new(0.0f, 0.0f, 0.0f), vec3_new(0.0f, size.y, 0.0f), vec3_new(0.0f, 0.0f, size.z)); //Right
+    vertex_array_push_plane_xyz(mesh, 1, 1, vec3_new(size.x, 0.0f, 0.0f), vec3_new(0.0f, 0.0f, size.z), vec3_new(0.0f, size.y, 0.0f)); //Left
+
+    array_cut(mesh->indices);
+    array_cut(mesh->vertices);
+
+    vmesh_move(mesh, vec3_mult(size, -0.5));
     vertex_array_set_face_normal(mesh->vertices, mesh->indices);
     return mesh;
 }
