@@ -30,14 +30,13 @@ void vec3_normal_array_normalize(vec3* v, const unsigned int size)
     }
 }
 
-array_t* vertex_array_by_index_array(array_t* index, array_t* buffer)
+array_t vertex_array_by_index_array(array_t* index, array_t* buffer)
 {
-    array_t* ret = NULL;
-    if (index->used > 0) {
-        ret = array_new(index->used, buffer->bytes);
-        for (unsigned int i = 0; i < index->used; i++) {
+    array_t ret = array_create(buffer->bytes);
+    if (index->size > 0) {
+        for (unsigned int i = 0; i < index->size; i++) {
             unsigned int j = *(unsigned int*)array_index(index, i);
-            array_push(ret, array_index(buffer, j - 1));
+            array_push(&ret, array_index(buffer, j - 1));
         }
     }
     array_free(index);

@@ -103,19 +103,19 @@ void wavefront_file_write(const char* path, const unsigned int size,
     printf("Writing obj file '%s'.\n", path);
 
     if (temp_vertices != NULL) {
-        for (unsigned int i = 0; i < temp_vertices->used; i++) {
+        for (unsigned int i = 0; i < temp_vertices->size; i++) {
             vec3 v = *(vec3*)array_index(temp_vertices, i);
             fprintf(file, "v %f %f %f\n", v.x, v.y, v.z);
         }
     }
     if (temp_uvs != NULL) {
-        for (unsigned int i = 0; i < temp_uvs->used; i++) {
+        for (unsigned int i = 0; i < temp_uvs->size; i++) {
             vec2 v = *(vec2*)array_index(temp_uvs, i);
             fprintf(file, "vt %f %f\n", v.x, v.y);
         }
     }
     if (temp_normals != NULL) {
-        for (unsigned int i = 0; i < temp_normals->used; i++) {
+        for (unsigned int i = 0; i < temp_normals->size; i++) {
             vec3 v = *(vec3*)array_index(temp_normals, i);
             fprintf(file, "vn %f %f %f\n", v.x, v.y, v.z);
         }
@@ -155,10 +155,10 @@ void wavefront_file_write(const char* path, const unsigned int size,
     fclose(file);
     printf("Succesfully writed '%s' file.\n", path);
 
-    array_destroy(v_index);
-    array_destroy(u_index);
-    array_destroy(n_index);
-    array_destroy(temp_vertices);
-    array_destroy(temp_uvs);
-    array_destroy(temp_normals);
+    array_free(v_index);
+    array_free(u_index);
+    array_free(n_index);
+    array_free(temp_vertices);
+    array_free(temp_uvs);
+    array_free(temp_normals);
 }

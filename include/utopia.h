@@ -51,8 +51,8 @@ typedef struct list_t {
 *********************************************/
 
 #define _array_index(array, i) ((char*)(array)->data + (i) * (array)->bytes)
-#define _array_pop(array, i) (!array->used) ? NULL : _array_index(array, --array->used)
-#define _array_peek(array, i) (!array->used) ? NULL : _array_index(array, array->used - 1)
+#define _array_pop(array, i) (!array->size) ? NULL : _array_index(array, --array->size)
+#define _array_peek(array, i) (!array->size) ? NULL : _array_index(array, array->size - 1)
 
 /***************************
  -> Dynamic Generic Array <- 
