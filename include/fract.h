@@ -52,11 +52,10 @@ typedef struct {
     float data[4][4];
 } mat4;
 
-/*
------------------------------------
+
+/*-----------------------------------
  -> Math Utilities and Functions <- 
------------------------------------
-*/
+-----------------------------------*/
 
 /*********************************************
  -> OS independent pseudo random algorithms <- 
@@ -112,11 +111,10 @@ vec2 rad_to_vec2(float rad);
 float noise2d(float x, float y, int seed);
 float perlin2d(float x, float y, float freq, int depth, int seed);
 
-/*
----------------------------------------
+
+/*---------------------------------------
  -> Vector Structures and Operations <- 
----------------------------------------
-*/
+---------------------------------------*/
 
 /*******************************************
  -> two dimensional floating point vector <- 
@@ -162,7 +160,7 @@ vec2 vec2_lerp(vec2 a, vec2 b, float t);
 void vec2_move(vec2* v, vec2 move);
 void vec2_scale(vec2* v, float scale);
 
-//not supported yet on vec3 and vec4
+/* not supported yet on vec3 and vec4 */
 vec2 vec2_rotate(vec2 src, float rads);
 vec2 vec2_rotate_around(vec2 src, vec2 center, float rads);
 vec2 vec2_rotate_and_scale_around(vec2 src, vec2 center, float rads, float scale);
@@ -283,11 +281,10 @@ vec2 ivec2_to_vec2(ivec2 v);
 vec3 ivec3_to_vec3(ivec3 v);
 vec4 ivec4_to_vec4(ivec4 v);
 
-/*
----------------------------------------
+
+/*---------------------------------------
  -> Matrix Structures and Operations <- 
----------------------------------------
-*/
+---------------------------------------*/
 
 /***************************************************
  ->   lightweight stack matrix data structures <- 
@@ -319,11 +316,10 @@ mat4 mat4_look_at_RH(vec3 eye_position, vec3 eye_direction, vec3 eye_up);
 mat4 mat4_look_at(vec3 eye_position, vec3 eye_direction, vec3 eye_up);
 mat4 mat4_model(vec3 translation, vec3 scale, vec3 rot_axis, float rot_degs);
 
-/*
------------------------
+
+/*-----------------------
  -> Print Data Types <- 
------------------------
-*/
+-----------------------*/
 
 /***************************
  -> formating to stdout   <- 
