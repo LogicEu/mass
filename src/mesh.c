@@ -33,7 +33,6 @@ mesh_t mesh_load(const char* path)
     mesh.uvs = vertex_array_by_index_array(&u_index, &temp_uvs);
     mesh.normals = vertex_array_by_index_array(&n_index, &temp_normals);
     if (!mesh.normals.size) {
-        array_free(&mesh.normals);
         mesh.normals = vec3_face_normal_array(&mesh.vertices);
     }
     return mesh;
