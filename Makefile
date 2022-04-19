@@ -3,7 +3,7 @@
 STD=-std=c99
 WFLAGS=-Wall -Wextra
 OPT=-O2
-IDIR=-I. -Iinclude/
+IDIR=-I. -Iinclude
 CC=gcc
 NAME=libmass
 SRC=src/*.c
@@ -15,9 +15,11 @@ LPATHS=$(patsubst %,$(LDIR)/%,$(LSTATIC))
 LFLAGS=$(patsubst %,-L%,$(LDIR))
 LFLAGS += $(patsubst %,-l%,$(LIBS))
 
-CFLAGS=$(STD) $(WFLAGS) $(OPT) $(IDIR)
-OS=$(shell uname -s)
+SCRIPT=build.sh
 
+CFLAGS=$(STD) $(WFLAGS) $(OPT) $(IDIR)
+
+OS=$(shell uname -s)
 ifeq ($(OS),Darwin)
 	OSFLAGS=-dynamiclib
 	LIB=$(NAME).dylib
@@ -27,10 +29,10 @@ else
 endif
 
 static: $(SRC)
-	$(CC) $(CFLAGS) -c $^ && ar -crv $(NAME).a *.o && rm *.o
+	$(CC) $(CFLAGS) -c $^ && ar -cr $(NAME).a *.o && rm *.o
 
 $(LDIR): 
-	mkdir $(LDIR)
+	@[ -d "$(LDIR)" ] || mkdir $(LDIR) && echo "mkdir $(LDIR)"
 
 $(LDIR)%.a: %
 	cd $^ && make && mv $@ ../
@@ -41,5 +43,12 @@ $(LPATHS): $(LDIR) $(LSTATIC)
 shared: $(SRC) $(LPATHS)
 	$(CC) -o $(LIB) $(SRC) $(CFLAGS) $(LFLAGS) $(OSFLAGS)
 
-clean:
-	./build.sh -clean
+clean: $(SCRIPT)
+	./$^ $@
+
+install: $(SCRIPT)
+	./$^ $@
+
+uninstall: $(SCRIPT)
+	./$^ $@
+

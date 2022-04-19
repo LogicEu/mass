@@ -12,86 +12,98 @@ flags=(
 )
 
 inc=(
-    -I./
-    -Iinclude/
+    -I.
+    -Iinclude
 )
 
 lib=(
-    -Llib/
+    -Llib
     -lfract
     -lutopia
 )
-
-fail_op() {
-    echo "Run with -d to build dynamically, or -s to build statically."
-    exit
-}
-
-fail_os() {
-    echo "OS is not supported yet..."
-    exit
-}
-
-mac_dlib() {
-    $cc ${flags[*]} ${inc[*]} ${lib[*]} -dynamiclib $src -o $name.dylib 
-}
-
-linux_dlib() {
-    $cc -shared ${flags[*]} ${inc[*]} ${lib[*]} -lm -fPIC $src -o $name.so 
-}
 
 lib_build() {
     pushd $1/ && ./build.sh $2 && popd && mv $1/lib$1.a lib/lib$1.a
 }
 
 build() {
-    mkdir lib/
-    lib_build fract -s
-    lib_build utopia -slib
+    [ ! -d lib/ ] && mkdir lib/
+    lib_build fract static
+    lib_build utopia static
 }
 
-dlib() {
+shared() {
     if echo "$OSTYPE" | grep -q "darwin"; then
-        mac_dlib
+        $cc ${flags[*]} ${inc[*]} ${lib[*]} -dynamiclib $src -o $name.dylib 
     elif echo "$OSTYPE" | grep -q "linux"; then
-        linux_dlib
+        $cc -shared ${flags[*]} ${inc[*]} ${lib[*]} -lm -fPIC $src -o $name.so 
     else
-        fails_os
+        echo "This OS is not supported yet..." && exit
     fi
 }
 
-slib() {
-    $cc ${flags[*]} ${inc[*]} -c $src && ar -crv $name.a *.o && rm *.o
+static() {
+    $cc ${flags[*]} ${inc[*]} -c $src && ar -cr $name.a *.o && rm *.o
 }
 
 cleanf() {
-    if [ -f $1 ]; then
-        rm $1
-    fi
+    [ -f $1 ] && rm $1 && echo "deleted $1"
 }
 
 cleand() {
-    if [ -d $1 ]; then
-        rm -r $1
-    fi
+    [ -d $1 ] && rm -r $1 & echo "deleted $1"
 }
 
 clean() {
-    cleanf $name.dylib
-    cleanf $name.so
     cleanf $name.a
+    cleanf $name.so
+    cleanf $name.dylib
     cleand lib
+    return 0
 }
 
+install() {
+    [ "$EUID" -ne 0 ] && echo "Run with sudo to install" && exit
+
+    build && shared && static
+    cp mass.h /usr/local/include/
+
+    [ -f $name.a ] && mv $name.a /usr/local/lib/
+    [ -f $name.so ] && mv $name.so /usr/local/lib/
+    [ -f $name.dylib ] && mv $name.dylib /usr/local/lib/
+
+    echo "Successfully installed $name"
+    return 0
+}
+
+uninstall() {
+    [ "$EUID" -ne 0 ] && echo "Run with sudo to uninstall" && exit
+
+    cleanf /usr/local/include/mass.h
+    cleanf /usr/local/lib/$name.a
+    cleanf /usr/local/lib/$name.so
+    cleanf /usr/local/lib/$name.dylib
+
+    echo "Successfully uninstalled $name"
+    return 0
+}
+
+
 case "$1" in
-    "-build")
+    "build")
         build;;
-    "-d")
-        build && dlib;;
-    "-s")
-        slib;;
-    "-clean")
+    "shared")
+        build && shared;;
+    "static")
+        static;;
+    "clean")
         clean;;
+    "install")
+        install;;
+    "uninstall")
+        uninstall;;
     *)
-        fail_op;;
+        echo "Run with 'static' or 'shared' to build."
+        echo "Use 'install' to build and install in /usr/local"
+        echo "Use 'clean' to remove local builds.";;
 esac
