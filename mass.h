@@ -16,11 +16,6 @@ Mesh and vertex C library for handling 3D models.
 #include <fract.h>
 #include <utopia.h>
 
-typedef struct table_t {
-    array_t values;
-    array_t indices;
-} table_t;
-
 typedef struct mesh_t {
     array_t vertices;
     array_t normals;
@@ -32,13 +27,6 @@ typedef struct imesh_t {
     table_t normals;
     table_t uvs;
 } imesh_t;
-
-/* --- Table Data Structure --- */
-table_t table_create(const size_t bytes);
-table_t table_compress(const array_t* buffer);
-array_t table_decompress(const table_t* table);
-size_t table_push(table_t* table, const void* data);
-void table_free(table_t* table);
 
 /* --- Wavefront OBJ File Format I/O --- */
 imesh_t imesh_load_wavefront(const char* path);
