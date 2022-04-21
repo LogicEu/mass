@@ -5,128 +5,90 @@
 extern "C" {
 #endif
 
-/*================================================
+/*====================================================
 
->>>>>>>>>>>>>>  MASS MESH FRAME   >>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>  MASS, MESH & MODELS   >>>>>>>>>>>>>>>>
 
-Mesh and vertex framework for handling 3D models. 
+Mesh and vertex C library for handling 3D models. 
 
-=========================== @Eugenio Arteaga A. */
+=============================== @Eugenio Arteaga A. */
 
 #include <fract.h>
 #include <utopia.h>
 
-typedef enum {
-    OBJ_V,
-    OBJ_VN,
-    OBJ_VTN
-} obj_flag;
+typedef struct table_t {
+    array_t values;
+    array_t indices;
+} table_t;
 
-typedef struct {
-    vec3 position;
-    vec2 uv;
-    vec3 normal;
-} vertex_t;
-
-typedef struct {
+typedef struct mesh_t {
     array_t vertices;
     array_t normals;
     array_t uvs;
 } mesh_t;
 
-typedef struct {
-    array_t vertices;
-    array_t indices;
-    obj_flag type;
-} vmesh_t;
+typedef struct imesh_t {
+    table_t vertices;
+    table_t normals;
+    table_t uvs;
+} imesh_t;
 
-/*------------------------------------
- -> Wavefront OBJ File Format I/O <- 
-------------------------------------*/
+/* --- Table Data Structure --- */
+table_t table_create(const size_t bytes);
+table_t table_compress(const array_t* buffer);
+array_t table_decompress(const table_t* table);
+size_t table_push(table_t* table, const void* data);
+void table_free(table_t* table);
 
-void wavefront_file_load(const char* path, obj_flag* type, 
-                        array_t* v_index, array_t* u_index, array_t* n_index,
-                        array_t* temp_positions, array_t* temp_uvs, array_t* temp_normals);
-void wavefront_file_write(const char* path, const unsigned int size,
-                        array_t* temp_vertices, array_t* temp_uvs, array_t* temp_normals,
-                        array_t* v_index, array_t* u_index, array_t* n_index);
+/* --- Wavefront OBJ File Format I/O --- */
+imesh_t imesh_load_wavefront(const char* path);
+void imesh_save_wavefront(const imesh_t* mesh, const char* path);
+void mesh_save_wavefront(const mesh_t* mesh, const char* path);;
 
-/*-----------------------------
- -> Useful Array Extension <- 
------------------------------*/
+/* --- iMesh 3D --- */
+imesh_t imesh_create(void);
+imesh_t imesh_load(const char* path);
+imesh_t imesh_shape_quad(const float x, const float y);
+imesh_t imesh_shape_plane(const size_t width, const size_t height);
+imesh_t imesh_shape_cube(const size_t size);
+imesh_t imesh_shape_hex(const vec3 size);
+imesh_t imesh_shape_sphere(const size_t detail);
+void imesh_save(const imesh_t* mesh, const char* path);
+void imesh_free(imesh_t* mesh);
 
-array_t array_map(array_t* buffer);
-void array_map_indexed(array_t* buffer, array_t* map, array_t* indices);
-void array_push_indexed(array_t* map, array_t* indices, void* data);
-
-/*--------------------------
- -> 3D Vertex Data Type <- 
---------------------------*/
-
-vertex_t vertex_new(vec3 position, vec2 uv, vec3 normal);
-void vertex_array_normalize_normals(vertex_t* v, const unsigned int size);
-void vec3_normal_array_normalize(vec3* v, const unsigned int size);
-array_t vertex_array_by_index_array(array_t* index, array_t* buffer);
-
-/*-----------------------------
- -> Procedural Opertations <- 
------------------------------*/
-
-void vec3_position_array_push_quad_z(array_t* positions, float x, float y);
-void vertex_array_push_quad_z(array_t* vertices, array_t* indices, float x, float y);
-void vertex_array_push_quad_xyz(array_t* vertices, array_t* indices, vec3 off, vec3 xvec, vec3 yvec);
-void vertex_array_push_plane_z(vmesh_t* mesh, const unsigned int x_size, const unsigned int y_size);
-void vertex_array_push_plane_xyz(vmesh_t* mesh, const unsigned int x_size, const unsigned int y_size, vec3 off, vec3 xvec, vec3 yvec);
-array_t vec3_face_normal_array(array_t* positions);
-void vertex_array_set_face_normal(array_t* vertices, array_t* indices);
-
-/*--------------------------
- -> 3D Mesh of Vectors <- 
---------------------------*/
-
-mesh_t mesh_new();
+/* --- Mesh of 3D Vectors --- */
+mesh_t mesh_create(void);
 mesh_t mesh_load(const char* path);
+mesh_t mesh_shape_quad(const float x, const float y);
+mesh_t mesh_shape_plane(const size_t width, const size_t height);
+mesh_t mesh_shape_cube(const size_t size);
+mesh_t mesh_shape_hex(const vec3 size);
+mesh_t mesh_shape_sphere(const size_t detail);
+void mesh_save(const mesh_t* mesh, const char* path);
+void mesh_save_quick(const mesh_t* mesh, const char* path);
 void mesh_free(mesh_t* mesh);
-mesh_t mesh_shape_quad(float x, float y);
-mesh_t mesh_shape_plane(const unsigned int width, const unsigned int height);
 
-/*--------------------------
- -> 3D Mesh of Vertices <- 
---------------------------*/
+/* --- Procedural Operations --- */
+void mesh_push_quad_z(mesh_t* mesh, const float x, const float y);
+void imesh_push_quad_z(imesh_t* mesh, const float x, const float y);
+void mesh_push_quad_xyz(mesh_t* mesh, const vec3 off, const vec3 xvec, const vec3 yvec);
+void imesh_push_quad_xyz(imesh_t* mesh, const vec3 off, const vec3 xvec, const vec3 yvec);
+void mesh_push_plane_z(mesh_t* mesh, const size_t xsize, const size_t ysize);
+void imesh_push_plane_z(imesh_t* mesh, const size_t xsize, const size_t ysize);
+void mesh_push_plane_xyz(mesh_t* mesh, const size_t xsize, const size_t ysize, const vec3 off, const vec3 xvec, const vec3 yvec);
+void imesh_push_plane_xyz(imesh_t* mesh, const size_t xsize, const size_t ysize, const vec3 off, const vec3 xvec, const vec3 yvec);
+void mesh_normals_get_face(mesh_t* mesh);
+void imesh_normals_get_face(imesh_t* mesh);
+void mesh_scale(mesh_t* mesh, const float f);
+void imesh_scale(imesh_t* mesh, const float f);
+void mesh_move(mesh_t* mesh, const vec3 add);
+void imesh_move(imesh_t* mesh, const vec3 add);
+void mesh_normalize(mesh_t* mesh);
+void imesh_normalize(imesh_t* mesh);
 
-vmesh_t vmesh_new();
-vmesh_t vmesh_shape_plane(const unsigned int width, const unsigned int height);
-void vmesh_combine(vmesh_t* m1, vmesh_t* m2);
-void vmesh_scale(vmesh_t* mesh, float f);
-void vmesh_move(vmesh_t* mesh, vec3 add);
-vmesh_t vmesh_shape_cube(const unsigned int size);
-vmesh_t vmesh_shape_hex(const vec3 size);
-void vmesh_normalize_positions(vmesh_t* mesh);
-vmesh_t vmesh_shape_sphere(unsigned int size);
-void vmesh_smooth_optim(vmesh_t* m);
-void vmesh_smooth_sphere(vmesh_t* m);
-void vmesh_min_max_height(vmesh_t* mesh, float* min, float* max);
-void vmesh_height_color_gradient(vmesh_t* mesh);
-void vmesh_free(vmesh_t* mesh);
-vmesh_t vmesh_load(const char* path);
-vmesh_t vmesh_load_optim(const char* path);
-
-/*-------------------------------
- -> Mass Mesh Write OBJ File <- 
--------------------------------*/
-
-void mesh_write_file(mesh_t* mesh, const char* path);
-void vmesh_write_file(vmesh_t* mesh, const char* path);
-void mesh_write_file_quick(mesh_t* mesh, const char* path);
-void vmesh_write_file_quick(vmesh_t* mesh, const char* path);
-
-/*------------------------
- -> Mesh Type Casting <- 
-------------------------*/
-
-vmesh_t mesh_to_vmesh(mesh_t* m);
-vmesh_t mesh_to_vmesh_optim(mesh_t* m);
-mesh_t vmesh_to_mesh(vmesh_t* m);
+/* --- Mesh Type Convertions --- */
+mesh_t imesh_to_mesh(const imesh_t* mesh);
+imesh_t mesh_to_imesh(const mesh_t* mesh);
 
 #ifdef __cplusplus
 }
