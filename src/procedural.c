@@ -135,18 +135,17 @@ void mesh_normals_get_face(mesh_t* mesh)
 
 void imesh_normals_get_face(imesh_t* mesh)
 {
-    array_clear(&mesh->normals.indices);
-    array_clear(&mesh->normals.values);
+    table_free(&mesh->normals);
 
-    vec3* pos = mesh->vertices.values.data;
-    size_t* indices = mesh->vertices.indices.data;
+    vec3* pos = mesh->vertices.data;
+    size_t* indices = mesh->vertices.indices;
     
-    const size_t triangles = mesh->vertices.indices.size / 3;
+    const size_t triangles = table_indices_size(&mesh->vertices) / 3;
     for (size_t i = 0; i < triangles; i++) {
         
-        size_t p1 = indices[i * 3 + 0];
-        size_t p2 = indices[i * 3 + 1];
-        size_t p3 = indices[i * 3 + 2];
+        size_t p1 = indices[i * 3 + 0] - 1;
+        size_t p2 = indices[i * 3 + 1] - 1;
+        size_t p3 = indices[i * 3 + 2] - 1;
 
         vec3 vu = _vec3_sub(pos[p2], pos[p1]);
         vec3 vv = _vec3_sub(pos[p3], pos[p1]);
@@ -154,8 +153,8 @@ void imesh_normals_get_face(imesh_t* mesh)
         n = vec3_norm(n);
         
         size_t search = table_push(&mesh->normals, &n);
-        array_push(&mesh->normals.indices, &search);
-        array_push(&mesh->normals.indices, &search);
+        table_push_index(&mesh->normals, search);
+        table_push_index(&mesh->normals, search);
     }
 }
 
@@ -182,25 +181,26 @@ void mesh_merge(mesh_t* restrict m1, mesh_t* restrict m2)
     mesh_free(m2);
 }
 
+/* this function frees the second mesh passed in */
 void imesh_merge(imesh_t* restrict m1, imesh_t* restrict m2)
 {
-    const size_t vsize = m2->vertices.indices.size;
-    size_t* vindices = m2->vertices.indices.data;
-    vec2* v = m2->vertices.values.data;
+    const size_t vsize = table_indices_size(&m2->vertices);
+    size_t* vindices = m2->vertices.indices;
+    vec2* v = m2->vertices.data;
     for (size_t i = 0; i < vsize; ++i) {
         table_push(&m1->vertices, v + vindices[i]);
     }
 
-    const size_t nsize = m2->normals.indices.size;
-    size_t* nindices = m2->vertices.indices.data;
-    vec3* n = m2->normals.values.data;
+    const size_t nsize = table_indices_size(&m2->normals);
+    size_t* nindices = m2->normals.indices;
+    vec3* n = m2->normals.data;
     for (size_t i = 0; i < nsize; ++i) {
         table_push(&m1->normals, n + nindices[i]);
     }
 
-    const size_t uvsize = m2->uvs.indices.size;
-    size_t* uvindices = m2->vertices.indices.data;
-    vec2* uv = m2->uvs.values.data;
+    const size_t uvsize = table_indices_size(&m2->uvs);
+    size_t* uvindices = m2->uvs.indices;
+    vec2* uv = m2->uvs.data;
     for (size_t i = 0; i < uvsize; ++i) {
         table_push(&m1->uvs, uv + uvindices[i]);
     }
@@ -219,8 +219,8 @@ void mesh_scale(mesh_t* mesh, const float f)
 
 void imesh_scale(imesh_t* mesh, const float f)
 {
-    const size_t vsize = mesh->vertices.values.size;
-    vec3* v = mesh->vertices.values.data;
+    const size_t vsize = mesh->vertices.size;
+    vec3* v = mesh->vertices.data;
     for (size_t i = 0; i < vsize; i++) {
         v[i] = vec3_mult(v[i], f);
     }
@@ -237,8 +237,8 @@ void mesh_move(mesh_t* mesh, const vec3 add)
 
 void imesh_move(imesh_t* mesh, const vec3 add)
 {
-    const size_t vsize = mesh->vertices.values.size;
-    vec3* v = mesh->vertices.values.data;
+    const size_t vsize = mesh->vertices.size;
+    vec3* v = mesh->vertices.data;
     for (size_t i = 0; i < vsize; i++) {
         v[i] = vec3_add(v[i], add);
     }
@@ -255,8 +255,8 @@ void mesh_normalize(mesh_t* mesh)
 
 void imesh_normalize(imesh_t* mesh)
 {
-    const size_t vsize = mesh->vertices.values.size;
-    vec3* v = mesh->vertices.values.data;
+    const size_t vsize = mesh->vertices.size;
+    vec3* v = mesh->vertices.data;
     for (size_t i = 0; i < vsize; i++) {
         v[i] = vec3_norm(v[i]);
     }

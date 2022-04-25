@@ -25,21 +25,21 @@ imesh_t imesh_load_wavefront(const char* path)
         if (!strcmp("vt", line_header)) {
             vec2 v;
             fscanf(file, "%f %f", &v.x, &v.y);
-            array_push(&mesh.uvs.values, &v);
+            table_push_data(&mesh.uvs, &v);
         }
         else if (!strcmp("vn", line_header)) {
             vec3 v;
             fscanf(file, "%f %f %f", &v.x, &v.y, &v.z);
-            array_push(&mesh.normals.values, &v);
+            table_push_data(&mesh.normals, &v);
         }
         else if (!strcmp("v", line_header)) {
             vec3 v;
             fscanf(file, "%f %f %f", &v.x, &v.y, &v.z);
-            array_push(&mesh.vertices.values, &v);
+            table_push_data(&mesh.vertices, &v);
         }
         else if (!strcmp("f", line_header)) {
             
-            if (mesh.uvs.values.size) {
+            if (mesh.uvs.size) {
                 
                 size_t vindices[3]; 
                 size_t uvindices[3];
@@ -61,13 +61,9 @@ imesh_t imesh_load_wavefront(const char* path)
 
                 if (matches == 9) {
                     for (size_t i = 0; i < 3; ++i) {
-                        --vindices[i];
-                        --uvindices[i];
-                        --nindices[i];
-                        
-                        array_push(&mesh.vertices.indices, &vindices[i]);
-                        array_push(&mesh.uvs.indices, &uvindices[i]);
-                        array_push(&mesh.normals.indices, &nindices[i]);
+                        table_push_index(&mesh.vertices, vindices[i] - 1);
+                        table_push_index(&mesh.uvs, uvindices[i] - 1);
+                        table_push_index(&mesh.normals, nindices[i] - 1);
                     }
                 } 
                 
@@ -77,7 +73,7 @@ imesh_t imesh_load_wavefront(const char* path)
                 }
             } 
             
-            else if (mesh.normals.values.size) {
+            else if (mesh.normals.size) {
 
                 size_t vindices[3]; 
                 size_t nindices[3];
@@ -95,10 +91,8 @@ imesh_t imesh_load_wavefront(const char* path)
 
                 if (matches == 6) {
                     for (size_t i = 0; i < 3; ++i) {
-                        --vindices[i];
-                        --nindices[i];
-                        array_push(&mesh.vertices.indices, &vindices[i]);
-                        array_push(&mesh.normals.indices, &nindices[i]);
+                        table_push_index(&mesh.vertices, vindices[i] - 1);
+                        table_push_index(&mesh.normals, nindices[i] - 1);
                     }
                 }
 
@@ -122,8 +116,7 @@ imesh_t imesh_load_wavefront(const char* path)
 
                 if (matches == 3) {
                     for (size_t i = 0; i < 3; ++i) {
-                        --vindices[i];
-                        array_push(&mesh.vertices.indices, &vindices[i]);
+                        table_push_index(&mesh.vertices, vindices[i] - 1);
                     }
                 } 
                 
@@ -147,58 +140,46 @@ void imesh_save_wavefront(const imesh_t* restrict mesh, const char* restrict pat
         return;
     }
 
-    fprintf(file, "# mass 3D model");
+    fprintf(file, "# mass 3D model\n");
 
-    vec3* v = mesh->vertices.values.data;
-    const size_t vsize =  mesh->vertices.values.size;
+    vec3* v = mesh->vertices.data;
+    const size_t vsize =  mesh->vertices.size;
     for (size_t i = 0; i < vsize; ++i) {
         fprintf(file, "v %f %f %f\n", v[i].x, v[i].y, v[i].z);
     }
 
-    vec3* n = mesh->normals.values.data;
-    const size_t nsize = mesh->normals.values.size;
+    vec3* n = mesh->normals.data;
+    const size_t nsize = mesh->normals.size;
     for (size_t i = 0; i < nsize; ++i) {
         fprintf(file, "vn %f %f %f\n", n[i].x, n[i].y, n[i].z);
     }
 
-    vec2* uv = mesh->uvs.values.data;
-    const size_t uvsize = mesh->uvs.values.size;
+    vec2* uv = mesh->uvs.data;
+    const size_t uvsize = mesh->uvs.size;
     for (size_t i = 0; i < uvsize; ++i) {
         fprintf(file, "vt %f %f\n", uv[i].x, uv[i].y);
     }
 
-    size_t* vindex = mesh->vertices.indices.data;
-    size_t* nindex = mesh->normals.indices.data;
-    size_t* uvindex = mesh->uvs.indices.data;
+    size_t* vindex = mesh->vertices.indices;
+    size_t* nindex = mesh->normals.indices;
+    size_t* uvindex = mesh->uvs.indices;
 
-    const size_t size = mesh->vertices.indices.size / 3;
+    const size_t size = table_indices_size(&mesh->vertices) / 3;
 
-    if (nsize && uvsize) {
-        for (size_t i = 0; i < size; ++i) {
-            fprintf(file, "f");
-            for (size_t j = i * 3; j < i * 3 + 3; ++j) {
-                fprintf(file, " %zu/%zu/%zu", vindex[j] + 1, uvindex[j] + 1, nindex[j] + 1);
+    for (size_t i = 0; i < size; ++i) {
+        fprintf(file, "f");
+        for (size_t j = i * 3; j < i * 3 + 3; ++j) {
+            if (nsize && uvsize) {
+                fprintf(file, " %zu/%zu/%zu", vindex[j], uvindex[j], nindex[j]);
             }
-            fprintf(file, "\n");
-        }
-    }
-    else if (nsize) {
-        for (size_t i = 0; i < size; ++i) {
-            fprintf(file, "f");
-            for (size_t j = i * 3; j < i * 3 + 3; ++j) {
-                fprintf(file, " %zu//%zu", vindex[j] + 1, nindex[j] + 1);
+            else if (nsize) {
+                fprintf(file, " %zu//%zu", vindex[j], nindex[j]);
             }
-            fprintf(file, "\n");
-        }
-    }
-    else {
-        for (size_t i = 0; i < size; ++i) {
-            fprintf(file, "f");
-            for (size_t j = i * 3; j < i * 3 + 3; ++j) {
-                fprintf(file, " %zu", vindex[j] + 1);
+            else {
+                fprintf(file, " %zu", vindex[j]);
             }
-            fprintf(file, "\n");
         }
+        fprintf(file, "\n");
     }
 
     fclose(file);
@@ -212,7 +193,7 @@ void mesh_save_wavefront(const mesh_t* restrict mesh, const char* restrict path)
         return;
     }
 
-    fprintf(file, "# mass 3D model");
+    fprintf(file, "# mass 3D model\n");
 
     vec3* v = mesh->vertices.data;
     const size_t vsize = mesh->vertices.size;
@@ -234,31 +215,22 @@ void mesh_save_wavefront(const mesh_t* restrict mesh, const char* restrict path)
 
     const size_t size = mesh->vertices.size / 3;
     
-    if (nsize && uvsize) {
-        for (size_t i = 0; i < size; i++) {
-            fprintf(file, "f");
-            for (size_t j = i * 3; j < i * 3 + 3; j++) {
-                fprintf(file, " %zu/%zu/%zu", j + 1, j + 1, j + 1);
+     for (size_t i = 0; i < size; ++i) {
+        fprintf(file, "f");
+        for (size_t j = i * 3; j < i * 3 + 3; ++j) {
+            const size_t n = j + 1;
+            if (nsize && uvsize) {
+                fprintf(file, " %zu/%zu/%zu", n, n, n);
             }
-            fprintf(file, "\n");
+            else if (nsize) {
+                fprintf(file, " %zu//%zu", n, n);
+            }
+            else {
+                fprintf(file, " %zu", n);
+            }
         }
+        fprintf(file, "\n");
     }
-    else if (nsize) {
-        for (size_t i = 0; i < size; i++) {
-            fprintf(file, "f");
-            for (size_t j = i * 3; j < i * 3 + 3; j++) {
-                fprintf(file, " %zu//%zu", j + 1, j + 1);
-            }
-            fprintf(file, "\n");
-        }
-    } else {
-        for (size_t i = 0; i < size; i++) {
-            fprintf(file, "f");
-            for (size_t j = i * 3; j < i * 3 + 3; j++) {
-                fprintf(file, " %zu", j + 1);
-            }
-            fprintf(file, "\n");
-        }
-    }
+
     fclose(file);
 }
