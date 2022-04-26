@@ -261,3 +261,4 @@ void imesh_normalize(imesh_t* mesh)
         v[i] = vec3_norm(v[i]);
     }
 }
+

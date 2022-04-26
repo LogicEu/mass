@@ -73,6 +73,8 @@ void mesh_move(mesh_t* mesh, const vec3 add);
 void imesh_move(imesh_t* mesh, const vec3 add);
 void mesh_normalize(mesh_t* mesh);
 void imesh_normalize(imesh_t* mesh);
+void mesh_merge(mesh_t* m1, mesh_t* m2);
+void imesh_merge(imesh_t* m1, imesh_t* m2);
 
 /* --- Mesh Type Convertions --- */
 mesh_t imesh_to_mesh(const imesh_t* mesh);
