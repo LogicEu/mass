@@ -6,124 +6,97 @@
 
 imesh_t imesh_load_wavefront(const char* path)
 {
+    static const char* symbols = "/\n ";
+    
     imesh_t mesh = imesh_create();
-
     FILE* file = fopen(path, "r");
     if (!file) {
-        fprintf(stderr, "libmass not open file '%s'.\n", path);
+        fprintf(stderr, "libmass could not open file '%s'.\n", path);
         return mesh;
     }
 
-    char line_header[128];
+    size_t line_count = 0;
+    char line[BUFSIZ];
 
-    while (fscanf(file, "%s", line_header) != EOF) {
+    while ((fgets(line, BUFSIZ, file))) {
 
-        if (!strcmp("#", line_header)) {
+        ++line_count;
+
+        char* token = strtok(line, symbols);
+        if (!token || *token == '#') {
             continue;
         }
         
-        if (!strcmp("vt", line_header)) {
-            vec2 v;
-            fscanf(file, "%f %f", &v.x, &v.y);
-            table_push_data(&mesh.uvs, &v);
+        if (!strcmp("vt", token)) {
+            vec2 vt;
+            float *f = (float*)&vt;
+            const size_t size = sizeof(vec2) / sizeof(float);
+            for (size_t i = 0; i < size; ++i) {
+                if (!(token = strtok(NULL, symbols))) {
+                    fprintf(stderr, "libmass detected a problem in the .obj file '%s' at line %zu.\n", path, line_count);
+                    break;
+                }
+                sscanf(token, "%f", f++);
+            }
+            table_push_data(&mesh.uvs, &vt);
         }
-        else if (!strcmp("vn", line_header)) {
-            vec3 v;
-            fscanf(file, "%f %f %f", &v.x, &v.y, &v.z);
-            table_push_data(&mesh.normals, &v);
+        else if (!strcmp("vn", token)) {
+            vec3 vn;
+            float *f = (float*)&vn;
+            const size_t size = sizeof(vec3) / sizeof(float);
+            for (size_t i = 0; i < size; ++i) {
+                if (!(token = strtok(NULL, symbols))) {
+                    fprintf(stderr, "libmass detected a problem in the .obj file '%s' at line %zu.\n", path, line_count);
+                    break;
+                }
+                sscanf(token, "%f", f++);
+            }
+            table_push_data(&mesh.normals, &vn);
         }
-        else if (!strcmp("v", line_header)) {
+        else if (!strcmp("v", token)) {
             vec3 v;
-            fscanf(file, "%f %f %f", &v.x, &v.y, &v.z);
+            float *f = (float*)&v;
+            const size_t size = sizeof(vec3) / sizeof(float);
+            for (size_t i = 0; i < size; ++i) {
+                if (!(token = strtok(NULL, symbols))) {
+                    fprintf(stderr, "libmass detected a problem in the .obj file '%s' at line %zu.\n", path, line_count);
+                    break;
+                }
+                sscanf(token, "%f", f++);
+            }
             table_push_data(&mesh.vertices, &v);
         }
-        else if (!strcmp("f", line_header)) {
-            
-            if (mesh.uvs.size) {
-                
-                size_t vindices[3]; 
-                size_t uvindices[3];
-                size_t nindices[3];
+        else if (!strcmp("f", token)) {
 
-                int matches = fscanf(
-                    file, 
-                    "%zu/%zu/%zu %zu/%zu/%zu %zu/%zu/%zu\n", 
-                    &vindices[0], 
-                    &uvindices[0], 
-                    &nindices[0], 
-                    &vindices[1], 
-                    &uvindices[1], 
-                    &nindices[1], 
-                    &vindices[2], 
-                    &uvindices[2], 
-                    &nindices[2]
-                );
-
-                if (matches == 9) {
-                    for (size_t i = 0; i < 3; ++i) {
-                        table_push_index(&mesh.vertices, vindices[i] - 1);
-                        table_push_index(&mesh.uvs, uvindices[i] - 1);
-                        table_push_index(&mesh.normals, nindices[i] - 1);
-                    }
-                } 
-                
-                else {
-                    fprintf(stderr, "libmass won't recognize this format. I'm sorry.\n");
+            size_t indices[9], count = 0;
+            for (size_t i = 0; i < 9; ++i) {
+                if (!(token = strtok(NULL, symbols))) {
                     break;
                 }
-            } 
-            
-            else if (mesh.normals.size) {
+                sscanf(token, "%zu", &indices[count++]);
+            }
 
-                size_t vindices[3]; 
-                size_t nindices[3];
-
-                int matches = fscanf(
-                    file, 
-                    "%zu//%zu %zu//%zu %zu//%zu\n", 
-                    &vindices[0], 
-                    &nindices[0], 
-                    &vindices[1], 
-                    &nindices[1],
-                    &vindices[2], 
-                    &nindices[2]
-                );
-
-                if (matches == 6) {
-                    for (size_t i = 0; i < 3; ++i) {
-                        table_push_index(&mesh.vertices, vindices[i] - 1);
-                        table_push_index(&mesh.normals, nindices[i] - 1);
-                    }
-                }
-
-                else {
-                    fprintf(stderr, "libmass won't recognize this format. I'm sorry.\n");
-                    break;
+            if (count == 9) {
+                for (size_t i = 0; i < 3; ++i) {
+                    table_push_index(&mesh.vertices, indices[i * 3 + 0] - 1);
+                    table_push_index(&mesh.uvs, indices[i * 3 + 1] - 1);
+                    table_push_index(&mesh.normals, indices[i * 3 + 2] - 1);
                 }
             } 
-            
+            else if (count == 6) {
+                for (size_t i = 0; i < 3; ++i) {
+                    table_push_index(&mesh.vertices, indices[i * 2 + 0] - 1);
+                    table_push_index(&mesh.normals, indices[i * 2 + 1] - 1);
+                }
+            }
+            else if (count == 3) {
+                for (size_t i = 0; i < 3; ++i) {
+                    table_push_index(&mesh.vertices, indices[i] - 1);
+                }
+            } 
             else {
-                
-                size_t vindices[3];
-                
-                int matches = fscanf(
-                    file, 
-                    "%zu %zu %zu/\n", 
-                    &vindices[0], 
-                    &vindices[1], 
-                    &vindices[2]
-                );
-
-                if (matches == 3) {
-                    for (size_t i = 0; i < 3; ++i) {
-                        table_push_index(&mesh.vertices, vindices[i] - 1);
-                    }
-                } 
-                
-                else {
-                    fprintf(stderr, "libmass won't recognize this format. I'm sorry.\n");
-                    break;
-                }
+                fprintf(stderr, "libmass won't recognize format of file '%s'.\n", path);
+                break;
             }
         }
     }
