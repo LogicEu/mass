@@ -16,42 +16,41 @@ OpenGL. Supports main vector and matrix operations.
 	#define M_PI 3.14159265358979323846
 #endif
     
-typedef struct {
+typedef struct vec2 {
     float x, y;
 } vec2;
 
-typedef struct {
+typedef struct vec3 {
     float x, y, z;
 } vec3;
 
-typedef struct { 
+typedef struct vec4 {
     float x, y, z, w;
 } vec4;
 
-typedef struct { 
+typedef struct ivec2 {
     int x, y;
 } ivec2;
 
-typedef struct { 
+typedef struct ivec3 {
     int x, y, z;
 } ivec3;
 
-typedef struct { 
+typedef struct ivec4 {
     int x, y, z, w;
 } ivec4;
 
-typedef struct { 
+typedef struct mat2 {
     float data[2][2];
 } mat2;
 
-typedef struct { 
+typedef struct mat3 {
     float data[3][3];
 } mat3;
 
-typedef struct { 
+typedef struct mat4 {
     float data[4][4];
 } mat4;
-
 
 /*-----------------------------------
  -> Math Utilities and Functions <- 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cc=gcc
-src=src/*.c
+src=src/common/*.c src/2D/*.c src/3D/*.c
 name=libmass
 
 flags=(

@@ -6,7 +6,7 @@ OPT=-O2
 IDIR=-I. -Iinclude
 CC=gcc
 NAME=libmass
-SRC=src/*.c
+SRC=src/common/*.c src/2D/*.c src/3D/*.c
 
 LDIR=lib
 LIBS=fract utopia

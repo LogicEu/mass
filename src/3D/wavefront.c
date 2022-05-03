@@ -4,11 +4,11 @@
 
 /* --- Wavefront OBJ File Format I/O --- */
 
-imesh_t imesh_load_wavefront(const char* path)
+iMesh3D imesh3D_load_wavefront(const char* path)
 {
     static const char* symbols = "/\n ";
     
-    imesh_t mesh = imesh_create();
+    iMesh3D mesh = imesh3D_create();
     FILE* file = fopen(path, "r");
     if (!file) {
         fprintf(stderr, "libmass could not open file '%s'.\n", path);
@@ -105,7 +105,7 @@ imesh_t imesh_load_wavefront(const char* path)
     return mesh;
 }
 
-void imesh_save_wavefront(const imesh_t* restrict mesh, const char* restrict path)
+void imesh3D_save_wavefront(const iMesh3D* restrict mesh, const char* restrict path)
 {
     FILE* file = fopen(path, "w");
     if (!file) {
@@ -158,7 +158,7 @@ void imesh_save_wavefront(const imesh_t* restrict mesh, const char* restrict pat
     fclose(file);
 }
 
-void mesh_save_wavefront(const mesh_t* restrict mesh, const char* restrict path)
+void mesh3D_save_wavefront(const Mesh3D* restrict mesh, const char* restrict path)
 {
     FILE* file = fopen(path, "w");
     if (!file) {

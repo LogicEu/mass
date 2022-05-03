@@ -1,21 +1,19 @@
 #include <mass.h>
-#include <stdlib.h>
-#include <string.h>
 
-/* --- Mesh Type Convertions --- */
+/* --- 3D Mesh Type Convertions --- */
 
-mesh_t imesh_to_mesh(const imesh_t* mesh)
+Mesh3D imesh3D_to_mesh3D(const iMesh3D* mesh)
 {
-    mesh_t m;
+    Mesh3D m;
     m.vertices = table_decompress(&mesh->vertices);
     m.normals = table_decompress(&mesh->normals);
     m.uvs = table_decompress(&mesh->uvs);
     return m;
 }
 
-imesh_t mesh_to_imesh(const mesh_t* mesh)
+iMesh3D mesh3D_to_imesh3D(const Mesh3D* mesh)
 {
-    imesh_t m;
+    iMesh3D m;
     m.vertices = table_compress(&mesh->vertices);
     m.normals = table_compress(&mesh->normals);
     m.uvs = table_compress(&mesh->uvs);
