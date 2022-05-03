@@ -41,7 +41,8 @@ Mesh2D mesh2D_shape_polygon(const size_t sides)
     const float offset = 2 * M_PI / (float)sides;
     
     vec2 center = {0.0f, 0.0f};
-    vec2 p1 = {cosf(0.0), sinf(0.0)};
+    vec2 orig = {cosf(0.0), sinf(0.0)};
+    vec2 p1 = orig;
     
     for (size_t i = 1; i < sides; ++i) {
         
@@ -54,6 +55,10 @@ Mesh2D mesh2D_shape_polygon(const size_t sides)
 
         p1 = p2;
     }
+
+    array_push(&mesh.vertices, &center);
+    array_push(&mesh.vertices, &p1);
+    array_push(&mesh.vertices, &orig);
 
     return mesh;
 }
