@@ -150,21 +150,21 @@ void imesh3D_normals_get_face(iMesh3D* mesh)
     table_free(&mesh->normals);
 
     vec3* pos = mesh->vertices.data;
-    size_t* indices = mesh->vertices.indices;
+    size_t* indices = table_indices(&mesh->vertices);
     
     const size_t triangles = table_indices_size(&mesh->vertices) / 3;
     for (size_t i = 0; i < triangles; i++) {
         
-        size_t p1 = indices[i * 3 + 0] - 1;
-        size_t p2 = indices[i * 3 + 1] - 1;
-        size_t p3 = indices[i * 3 + 2] - 1;
+        size_t p1 = indices[i * 3 + 0];
+        size_t p2 = indices[i * 3 + 1];
+        size_t p3 = indices[i * 3 + 2];
 
         vec3 vu = _vec3_sub(pos[p2], pos[p1]);
         vec3 vv = _vec3_sub(pos[p3], pos[p1]);
         vec3 n = _vec3_cross(vu, vv);
         n = vec3_norm(n);
         
-        size_t search = table_push(&mesh->normals, &n);
+        size_t search = table_push(&mesh->normals, &n) - 1;
         table_push_index(&mesh->normals, search);
         table_push_index(&mesh->normals, search);
     }

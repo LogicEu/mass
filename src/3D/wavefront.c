@@ -133,9 +133,9 @@ void imesh3D_save_wavefront(const iMesh3D* restrict mesh, const char* restrict p
         fprintf(file, "vt %f %f\n", uv[i].x, uv[i].y);
     }
 
-    size_t* vindex = mesh->vertices.indices;
-    size_t* nindex = mesh->normals.indices;
-    size_t* uvindex = mesh->uvs.indices;
+    size_t* vindex = table_indices(&mesh->vertices);
+    size_t* nindex = table_indices(&mesh->normals);
+    size_t* uvindex = table_indices(&mesh->uvs);
 
     const size_t size = table_indices_size(&mesh->vertices) / 3;
 
@@ -143,13 +143,13 @@ void imesh3D_save_wavefront(const iMesh3D* restrict mesh, const char* restrict p
         fprintf(file, "f");
         for (size_t j = i * 3; j < i * 3 + 3; ++j) {
             if (nsize && uvsize) {
-                fprintf(file, " %zu/%zu/%zu", vindex[j], uvindex[j], nindex[j]);
+                fprintf(file, " %zu/%zu/%zu", vindex[j] + 1, uvindex[j] + 1, nindex[j] + 1);
             }
             else if (nsize) {
-                fprintf(file, " %zu//%zu", vindex[j], nindex[j]);
+                fprintf(file, " %zu//%zu", vindex[j] + 1, nindex[j] + 1);
             }
             else {
-                fprintf(file, " %zu", vindex[j]);
+                fprintf(file, " %zu", vindex[j] + 1);
             }
         }
         fprintf(file, "\n");
