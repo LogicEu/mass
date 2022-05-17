@@ -32,7 +32,6 @@ typedef struct queue_t {
     void* data;
     size_t bytes;
     size_t capacity;
-    size_t size;
     size_t rear;
     size_t front;
 } queue_t;
@@ -44,6 +43,12 @@ typedef struct table_t {
     size_t capacity;
     size_t size;
 } table_t;
+
+typedef struct string_t {
+    char* data;
+    size_t capacity;
+    size_t size;
+} string_t;
 
 typedef struct hash_t {
     bucket_t* indices;
@@ -65,18 +70,29 @@ typedef struct map_t {
     size_t (*func)(const void*);
 } map_t;
 
-typedef struct node_t {
+typedef struct lnode_t {
+    struct lnode_t *next;
+    struct lnode_t *prev;
     void* data;
-    struct node_t *next;
-    struct node_t *prev;
-} node_t;
+} lnode_t;
 
 typedef struct list_t {
-    node_t *head;
-    node_t *tail;
+    lnode_t *head;
+    lnode_t *tail;
     size_t bytes;
     size_t size;
 } list_t;
+
+typedef struct bnode_t {
+    struct bnode_t *left;
+    struct bnode_t *right;
+    void* data;
+} bnode_t;
+
+typedef struct btree_t {
+    bnode_t* root;
+    size_t bytes;
+} btree_t;
 
 /*********************************************
  -> Some macros for dangerously fast access <- 
@@ -164,6 +180,25 @@ size_t table_values_size(const table_t* table);
 size_t table_bytes(const table_t* table);
 void table_free(table_t* table);
 
+/******************************
+ -> Dynamic String Container <- 
+******************************/
+
+string_t string_create(const char* data);
+string_t string_copy(const string_t* str);
+void string_push(string_t* str, const char* buffer);
+void string_concat(string_t* str1, const string_t* str2);
+size_t string_capacity(const string_t* str);
+size_t string_size(const string_t* str);
+char* string_data(const string_t* str);
+size_t string_search(const string_t* str, const char* search);
+size_t* string_search_all(const string_t* str, const char* search);
+void string_remove(string_t* str, const char* search);
+void string_remove_all(string_t* str, const char* search);
+void string_reverse(string_t* str);
+void string_clear(string_t* str);
+void string_free(string_t* str);
+
 /********************************
  -> Generic Hash Indexed Table <- 
 ********************************/
@@ -212,14 +247,14 @@ list_t list_create(const size_t bytes);
 size_t list_size(const list_t* list);
 size_t list_bytes(const list_t* list);
 void* list_index(const list_t* list, const size_t index);
-node_t* list_search_node(const list_t* list, const void* data);
-node_t* list_index_node(const list_t* list, const size_t index);
+lnode_t* list_search_node(const list_t* list, const void* data);
+lnode_t* list_index_node(const list_t* list, const size_t index);
 size_t list_search_index(const list_t* list, const void* data);
 void list_push(list_t* list, const void* data);
 void* list_pop(list_t* list);
-void* list_pop_node(list_t* list, node_t* node);
+void* list_pop_node(list_t* list, lnode_t* node);
 void* list_pop_index(list_t* list, const size_t index);
-void list_remove_node(list_t* list, node_t* node);
+void list_remove_node(list_t* list, lnode_t* node);
 void list_remove_index(list_t* list, const size_t index);
 void list_free(list_t* list);
 
@@ -227,15 +262,26 @@ void list_free(list_t* list);
  -> Doubly Linked Generic Node <- 
 ********************************/
 
-node_t* node_create(void* data);
-void node_push(node_t* head, void* data);
-void* node_pop(node_t* node);
-void node_remove(node_t* node);
-size_t node_count(node_t* head);
-node_t* node_search(node_t* head, const void* data, const size_t bytes);
-size_t node_search_index(node_t* first, const void* data, const size_t bytes);
-node_t* node_index_forward(node_t* head, const size_t index);
-node_t* node_index_backward(node_t* tail, const size_t index, const size_t size);
+lnode_t* lnode_create(const void* data, const size_t bytes);
+void lnode_push(lnode_t* head, const void* data, const size_t bytes);
+void* lnode_pop(lnode_t* node);
+void lnode_remove(lnode_t* node);
+size_t lnode_count(lnode_t* head);
+lnode_t* lnode_search(lnode_t* head, const void* data, const size_t bytes);
+size_t lnode_search_index(lnode_t* first, const void* data, const size_t bytes);
+lnode_t* lnode_index_forward(lnode_t* head, const size_t index);
+lnode_t* lnode_index_backward(lnode_t* tail, const size_t index, const size_t size);
+
+/*************************
+ -> Generic Binary Tree <- 
+**************************/
+
+btree_t btree_create(const size_t bytes);
+void btree_free(btree_t* tree);
+
+bnode_t* bnode_create(const void* data, const size_t bytes);
+void bnode_connect(bnode_t* parent, const bnode_t* child);
+void bnode_free(bnode_t* root);
 
 /****************************
  -> Index Bucket Interface <- 
