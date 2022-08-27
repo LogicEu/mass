@@ -1,8 +1,13 @@
 #!/bin/bash
 
 cc=gcc
-src=src/common/*.c src/2D/*.c src/3D/*.c
 name=libmass
+
+src=(
+    src/common/*.c
+    src/2D/*.c
+    src/3D/*.c
+)
 
 flags=(
     -std=c99
@@ -34,16 +39,16 @@ build() {
 
 shared() {
     if echo "$OSTYPE" | grep -q "darwin"; then
-        $cc ${flags[*]} ${inc[*]} ${lib[*]} -dynamiclib $src -o $name.dylib 
+        $cc ${flags[*]} ${inc[*]} ${lib[*]} -dynamiclib ${src[*]} -o $name.dylib 
     elif echo "$OSTYPE" | grep -q "linux"; then
-        $cc -shared ${flags[*]} ${inc[*]} ${lib[*]} -lm -fPIC $src -o $name.so 
+        $cc -shared ${flags[*]} ${inc[*]} ${lib[*]} -lm -fPIC ${src[*]} -o $name.so 
     else
         echo "This OS is not supported yet..." && exit
     fi
 }
 
 static() {
-    $cc ${flags[*]} ${inc[*]} -c $src && ar -cr $name.a *.o && rm *.o
+    $cc ${flags[*]} ${inc[*]} -c ${src[*]} && ar -cr $name.a *.o && rm *.o
 }
 
 cleanf() {
@@ -51,7 +56,7 @@ cleanf() {
 }
 
 cleand() {
-    [ -d $1 ] && rm -r $1 & echo "deleted $1"
+    [ -d $1 ] && rm -r $1 && echo "deleted $1"
 }
 
 clean() {

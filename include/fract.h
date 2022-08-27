@@ -119,8 +119,8 @@ float perlin2d(float x, float y, float freq, int depth, int seed);
  -> two dimensional floating point vector <- 
 *******************************************/
 
-#define _vec2_new(x, y) {x, y}
-#define _vec2_uni(f) {f, f}
+#define _vec2_new(x, y) ((vec2){x, y})
+#define _vec2_uni(f) ((vec2){f, f})
 #define _vec2_cmp(a, b) (a.x == b.x && a.y == b.y)
 #define _vec2_unicmp(v, f) (v.x == f && v.y == f)
 #define _vec2_op(a, op, b) _vec2_new(a.x op b.x, a.y op b.y)
@@ -135,7 +135,7 @@ float perlin2d(float x, float y, float freq, int depth, int seed);
 #define _vec2_sqmag(v) _vec2_dot(v, v)
 #define _vec2_mag(v) sqrtf(_vec2_sqmag(v))
 #define _vec2_normal(v) _vec2_mult(v, 1.0 / _vec2_mag(v))
-#define _vec2_cross(a, b) {-(a.y - b.y), a.x - b.x};
+#define _vec2_cross(a, b) ((vec2){-(a.y - b.y), a.x - b.x})
 
 vec2 vec2_uni(float f);
 vec2 vec2_new(float x, float y);
@@ -169,8 +169,8 @@ vec2 vec2_scale_around(vec2 src, vec2 center, float scale);
  -> three dimensional floating point vector <- 
 *********************************************/
 
-#define _vec3_new(x, y, z) {x, y, z}
-#define _vec3_uni(f) {f, f, f}
+#define _vec3_new(x, y, z) ((vec3){x, y, z})
+#define _vec3_uni(f) ((vec3){f, f, f})
 #define _vec3_cmp(a, b) (a.x == b.x && a.y == b.y && a.z == b.z)
 #define _vec3_unicmp(v, f) (v.x == f && v.y == f && v.z == f)
 #define _vec3_op(a, op, b) _vec3_new(a.x op b.x, a.y op b.y, a.z op b.z)
@@ -185,7 +185,7 @@ vec2 vec2_scale_around(vec2 src, vec2 center, float scale);
 #define _vec3_sqmag(v) _vec3_dot(v, v)
 #define _vec3_mag(v) sqrtf(_vec3_sqmag(v))
 #define _vec3_normal(v) _vec3_mult(v, 1.0 / _vec3_mag(v))
-#define _vec3_cross(a, b) {a.y * b.z - b.y * a.z, a.z * b.x - b.z * a.x, a.x * b.y - b.x * a.y}
+#define _vec3_cross(a, b) ((vec3){a.y * b.z - b.y * a.z, a.z * b.x - b.z * a.x, a.x * b.y - b.x * a.y})
 
 vec3 vec3_uni(float f);
 vec3 vec3_new(float x, float y, float z);
@@ -213,8 +213,8 @@ void vec3_scale(vec3* v, float scale);
  -> four dimensional floating point vector <- 
 ********************************************/
 
-#define _vec4_new(x, y, z, w) {x, y, z, w}
-#define _vec4_uni(f) {f, f, f, f}
+#define _vec4_new(x, y, z, w) ((vec4){x, y, z, w})
+#define _vec4_uni(f) ((vec4){f, f, f, f})
 #define _vec4_cmp(a, b) (a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w)
 #define _vec4_unicmp(v, f) (v.x == f && v.y == f && v.z == f && v.w == f)
 #define _vec4_op(a, op, b) _vec4_new(a.x op b.x, a.y op b.y, a.z op b.z, a.w op b.w)
