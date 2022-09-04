@@ -76,8 +76,8 @@ float randf_signed();
 #define _minf(a, b) ((a) * ((a) <= (b)) + (b) * ((b) < (a)))
 #define _maxf(a, b) ((a) * ((a) >= (b)) + (b) * ((b) > (a)))
 #define _lerpf(a, b, t) (((a) * (1.0 - (t))) + ((b) * (t)))
-#define _smooth_lerpf(a, b, t) _lerpf(a, b, t * t * (3 - 2 * t))
-#define _inverse_lerpf(a, v, val) (((val) - (a)) / ((b) - (a)))
+#define _ilerpf(a, v, val) (((val) - (a)) / ((b) - (a)))
+#define _smoothlerpf(a, b, t) _lerpf(a, b, t * t * (3 - 2 * t))
 
 float absf(float f);
 float signf(float f);
@@ -85,14 +85,14 @@ float minf(float a, float b);
 float maxf(float a, float b);
 float clampf(float val, float min, float max);
 float lerpf(float a, float b, float t);
-float smooth_lerpf(float a, float b, float t);
-float inverse_lerpf(float a, float b, float val);
-float remapf(float input_a, float input_b, float out_a, float out_b, float val);
+float smoothlerpf(float a, float b, float t);
+float ilerpf(float a, float b, float val);
+float remapf(float in_a, float in_b, float out_a, float out_b, float val);
 float smoothstep(float a, float b, float x);
-float fast_inverse_sqrt(float num);
-float faster_inverse_sqrt(float num);
-float fast_sqrt(float num);
-float faster_sqrt(float num);
+float isqrtfast(float num);
+float isqrtfaster(float num);
+float sqrtfast(float num);
+float sqrtfaster(float num);
 
 /******************************************************
  -> floating point angles and vector transformations <- 
@@ -314,6 +314,7 @@ mat4 mat4_look_at_LH(vec3 eye_position, vec3 eye_direction, vec3 eye_up);
 mat4 mat4_look_at_RH(vec3 eye_position, vec3 eye_direction, vec3 eye_up);
 mat4 mat4_look_at(vec3 eye_position, vec3 eye_direction, vec3 eye_up);
 mat4 mat4_model(vec3 translation, vec3 scale, vec3 rot_axis, float rot_degs);
+vec4 vec4_mult_mat4(vec4 v, mat4 m);
 
 
 /*-----------------------
