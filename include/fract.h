@@ -71,13 +71,13 @@ float randf_signed();
  -> floating point functions and utilities <- 
 ********************************************/
 
-#define _absf(f) ((f) * ((f) >= 0.0) - (f) * ((f) < 0.0))
-#define _signf(f) (((f) >= 0.0) - ((f) < 0.0))
-#define _minf(a, b) ((a) * ((a) <= (b)) + (b) * ((b) < (a)))
-#define _maxf(a, b) ((a) * ((a) >= (b)) + (b) * ((b) > (a)))
-#define _lerpf(a, b, t) (((a) * (1.0 - (t))) + ((b) * (t)))
-#define _ilerpf(a, v, val) (((val) - (a)) / ((b) - (a)))
-#define _smoothlerpf(a, b, t) _lerpf(a, b, t * t * (3 - 2 * t))
+#define _absf(f) (((f) < 0.0) ? -(f) : (f))
+#define _signf(f) (((f) < 0.0) ? -1.0 : 1.0)
+#define _minf(a, b) (((a) < (b)) ? (a) : (b))
+#define _maxf(a, b) (((a) > (b)) ? (a) : (b))
+#define _lerpf(a, b, t) ((a) + (t) * ((b) - (a)))
+#define _ilerpf(min, max, x) (((x) - (min)) / ((max) - (min)))
+#define _smoothlerpf(a, b, t) _lerpf(a, b, (t) * (t) * (3.0 - 2.0 * (t)))
 
 float absf(float f);
 float signf(float f);
