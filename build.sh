@@ -1,82 +1,105 @@
 #!/bin/bash
 
 cc=gcc
+src=src/*.c
 name=libmass
-
-src=(
-    src/common/*.c
-    src/2D/*.c
-    src/3D/*.c
-)
 
 flags=(
     -std=c99
     -Wall
     -Wextra
+    -pedantic
     -O2
-)
-
-inc=(
     -I.
     -Iinclude
 )
 
-lib=(
+libs=(
     -Llib
-    -lfract
     -lutopia
+    -lfract
 )
 
+if echo "$OSTYPE" | grep -q "darwin"; then
+    dlib=(
+        -dynamiclib
+    )
+    suffix=.dylib
+elif echo "$OSTYPE" | grep -q "linux"; then
+    dlib=(
+        -lm
+        -shared
+        -fPIC
+    )
+    suffix=.so
+else
+    echo "This OS is not supported by this shell script yet..." && exit
+fi
+
+cmd() {
+    echo "$@" && $@
+}
+
 lib_build() {
-    pushd $1/ && ./build.sh $2 && popd && mv $1/lib$1.a lib/lib$1.a
+    [ -f lib/lib$1.a ] && return 0
+    cmd pushd $1/ && cmd ./build.sh $2 && cmd cp bin/* ../lib/ && cmd popd
 }
 
 build() {
-    [ ! -d lib/ ] && mkdir lib/
+    cmd mkdir -p lib
     lib_build fract static
     lib_build utopia static
 }
 
 shared() {
-    if echo "$OSTYPE" | grep -q "darwin"; then
-        $cc ${flags[*]} ${inc[*]} ${lib[*]} -dynamiclib ${src[*]} -o $name.dylib 
-    elif echo "$OSTYPE" | grep -q "linux"; then
-        $cc -shared ${flags[*]} ${inc[*]} ${lib[*]} -lm -fPIC ${src[*]} -o $name.so 
-    else
-        echo "This OS is not supported yet..." && exit
-    fi
+    build
+
+    cmd mkdir -p tmp
+    cmd $cc -c $src ${flags[*]} && cmd mv *.o tmp/ || exit
+    
+    cmd mkdir -p bin
+    cmd $cc tmp/*.o -o bin/$name$suffix ${libs[*]} ${dlib[*]}
 }
 
 static() {
-    $cc ${flags[*]} ${inc[*]} -c ${src[*]} && ar -cr $name.a *.o && rm *.o
-}
-
-cleanf() {
-    [ -f $1 ] && rm $1 && echo "deleted $1"
+    cmd mkdir -p tmp
+    cmd $cc ${flags[*]} -c $src && cmd mv *.o tmp/ || exit
+    
+    cmd mkdir -p bin
+    cmd ar -cr bin/$name.a tmp/*.o
 }
 
 cleand() {
-    [ -d $1 ] && rm -r $1 && echo "deleted $1"
+    [ -d $1 ] && cmd rm -r $1
+}
+
+cleanf() {
+    [ -f $1 ] && cmd rm $1
+}
+
+cleanr() {
+    cmd pushd $1 && ./build.sh clean && cmd popd
 }
 
 clean() {
-    cleanf $name.a
-    cleanf $name.so
-    cleanf $name.dylib
     cleand lib
+    cleand bin
+    cleand tmp
+    cleanr utopia
+    cleanr fract
     return 0
 }
 
 install() {
     [ "$EUID" -ne 0 ] && echo "Run with sudo to install" && exit
+    
+    make all -j # or shared && static
+    cmd cp mass.h /usr/local/include/
 
-    build && shared && static
-    cp mass.h /usr/local/include/
-
-    [ -f $name.a ] && mv $name.a /usr/local/lib/
-    [ -f $name.so ] && mv $name.so /usr/local/lib/
-    [ -f $name.dylib ] && mv $name.dylib /usr/local/lib/
-
+    [ -f bin/$name.a ] && cmd mv bin/$name.a /usr/local/lib
+    [ -f bin/$name.so ] && cmd mv bin/$name.so /usr/local/lib
+    [ -f bin/$name.dylib ] && cmd mv bin/$name.dylib /usr/local/lib
+    
     echo "Successfully installed $name"
     return 0
 }
@@ -93,14 +116,17 @@ uninstall() {
     return 0
 }
 
-
 case "$1" in
     "build")
         build;;
     "shared")
-        build && shared;;
+        shared;;
     "static")
         static;;
+    "all")
+        shared && static;;
+    "make")
+        make all -j;;
     "clean")
         clean;;
     "install")
@@ -108,7 +134,7 @@ case "$1" in
     "uninstall")
         uninstall;;
     *)
-        echo "Run with 'static' or 'shared' to build."
+        echo "Run with 'shared' or 'static' to build"
         echo "Use 'install' to build and install in /usr/local"
-        echo "Use 'clean' to remove local builds.";;
+        echo "Use 'clean' to remove local builds"
 esac

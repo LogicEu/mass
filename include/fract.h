@@ -1,3 +1,28 @@
+
+/*  Copyright (c) 2022 Eugenio Arteaga A.
+
+Permission is hereby granted, free of charge, to any 
+person obtaining a copy of this software and associated 
+documentation files (the "Software"), to deal in the 
+Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to 
+permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice 
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
+
 #ifndef FRACT_MATH_H
 #define FRACT_MATH_H
 
@@ -7,8 +32,7 @@ extern "C" {
 
 /*=====================================================
 >>>>>>>>>>>>>>>  FRACT MATH LIBRARY   >>>>>>>>>>>>>>>>>
-Math library for game development fully compatible with
-OpenGL. Supports main vector and matrix operations.
+ Small math library for game and graphics development.
 ================================= Eugenio Arteaga A. */
 
 #include <math.h>
@@ -28,26 +52,6 @@ typedef struct vec4 {
     float x, y, z, w;
 } vec4;
 
-typedef struct ivec2 {
-    int x, y;
-} ivec2;
-
-typedef struct ivec3 {
-    int x, y, z;
-} ivec3;
-
-typedef struct ivec4 {
-    int x, y, z, w;
-} ivec4;
-
-typedef struct mat2 {
-    float data[2][2];
-} mat2;
-
-typedef struct mat3 {
-    float data[3][3];
-} mat3;
-
 typedef struct mat4 {
     float data[4][4];
 } mat4;
@@ -60,12 +64,18 @@ typedef struct mat4 {
  -> OS independent pseudo random algorithms <- 
 *********************************************/
 
-void rand_seed(unsigned int seed);
-unsigned int rand_uint(unsigned int num);
-unsigned int rand_num();
-unsigned int rand_next();
-float randf_norm();
-float randf_signed();
+void frand_seed_set(unsigned int seed);
+unsigned int frand_seed_get(void);
+unsigned int frand_uint(void);
+float frand_norm(void);
+float frand_signed(void);
+
+/**************************************
+ -> 2D perlin noise useful functions <- 
+**************************************/
+
+float noise2d(float x, float y, int seed);
+float perlin2d(float x, float y, float freq, int depth, int seed);
 
 /********************************************
  -> floating point functions and utilities <- 
@@ -98,22 +108,10 @@ float sqrtfaster(float num);
  -> floating point angles and vector transformations <- 
 ******************************************************/
 
-float rad_to_deg(float rad);
-float deg_to_rad(float deg);
+vec2 rad2vec2(float rad);
+float rad2deg(float rad);
+float deg2rad(float deg);
 float vec2_to_rad(vec2 v);
-vec2 rad_to_vec2(float rad);
-
-/**************************************
- -> 2D perlin noise useful functions <- 
-**************************************/
-
-float noise2d(float x, float y, int seed);
-float perlin2d(float x, float y, float freq, int depth, int seed);
-
-
-/*---------------------------------------
- -> Vector Structures and Operations <- 
----------------------------------------*/
 
 /*******************************************
  -> two dimensional floating point vector <- 
@@ -252,54 +250,12 @@ vec4 vec4_lerp(vec4 a, vec4 b, float t);
 void vec4_move(vec4* v, vec4 move);
 void vec4_scale(vec4* v, float scale);
 
-/*******************************
- -> integer vector structures <- 
-*******************************/
-
-ivec2 ivec2_new(int x, int y);
-ivec2 ivec2_uni(int i);
-int ivec2_cmp(ivec2 v1, ivec2 v2);
-
-ivec3 ivec3_new(int x, int y, int z);
-ivec3 ivec3_uni(int i);
-int ivec3_cmp(ivec3 v1, ivec3 v2);
-
-ivec4 ivec4_new(int x, int y, int z, int w);
-ivec4 ivec4_uni(float i);
-int ivec4_cmp(ivec4 v1, ivec4 v2);
-
-/***********************************************
- -> integer and floating point vector casting <- 
-***********************************************/
-
-ivec2 vec2_to_ivec2(vec2 v);
-ivec3 vec3_to_ivec3(vec3 v);
-ivec4 vec4_to_ivec4(vec4 v);
-
-vec2 ivec2_to_vec2(ivec2 v);
-vec3 ivec3_to_vec3(ivec3 v);
-vec4 ivec4_to_vec4(ivec4 v);
-
-
-/*---------------------------------------
- -> Matrix Structures and Operations <- 
----------------------------------------*/
-
-/***************************************************
- ->   lightweight stack matrix data structures <- 
-***************************************************/
-
-mat2 mat2_new();
-mat2 mat2_id();
-mat3 mat3_new();
-mat3 mat3_id();
-mat4 mat4_new();
-mat4 mat4_id();
-
 /******************************************
  -> 4x4 matrix functions and operations  <- 
 ******************************************/
 
+mat4 mat4_new(void);
+mat4 mat4_id(void);
 mat4 mat4_translate(mat4 mat, vec3 v);
 mat4 mat4_scale(mat4 mat, vec3 v);
 mat4 mat4_mult(mat4 m1, mat4 m2);
@@ -316,26 +272,8 @@ mat4 mat4_look_at(vec3 eye_position, vec3 eye_direction, vec3 eye_up);
 mat4 mat4_model(vec3 translation, vec3 scale, vec3 rot_axis, float rot_degs);
 vec4 vec4_mult_mat4(vec4 v, mat4 m);
 
-
-/*-----------------------
- -> Print Data Types <- 
------------------------*/
-
-/***************************
- -> formating to stdout   <- 
-***************************/
-
-void ivec2_print(ivec2 v);
-void ivec3_print(ivec3 v);
-void ivec4_print(ivec4 v);
-void vec2_print(vec2 v);
-void vec3_print(vec3 v);
-void vec4_print(vec4 v);
-void mat2_print(mat2 m);
-void mat3_print(mat3 m);
-void mat4_print(mat4 m);
-
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif /* FRACT_MATH_H */
+

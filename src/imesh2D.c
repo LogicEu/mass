@@ -132,3 +132,11 @@ void imesh2D_move(iMesh2D* mesh, const vec2 add)
         v[i] = vec2_add(v[i], add);
     }
 }
+
+iMesh2D mesh2D_to_imesh2D(const Mesh2D* mesh)
+{
+    iMesh2D m;
+    m.vertices = table_compress(mesh->vertices.data, mesh->vertices.bytes, mesh->vertices.size);
+    m.uvs = table_compress(mesh->uvs.data, mesh->vertices.bytes, mesh->vertices.size);
+    return m;
+}

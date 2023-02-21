@@ -1,47 +1,71 @@
 # mass makefile
 
-STD=-std=c99
-WFLAGS=-Wall -Wextra
-OPT=-O2
-IDIR=-I. -Iinclude
-CC=gcc
-NAME=libmass
-SRC=src/common/*.c src/2D/*.c src/3D/*.c
+NAME = libmass
 
-LDIR=lib
-LIBS=fract utopia
-LSTATIC=$(patsubst %,lib%.a,$(LIBS))
-LPATHS=$(patsubst %,$(LDIR)/%,$(LSTATIC))
-LFLAGS=$(patsubst %,-L%,$(LDIR))
-LFLAGS += $(patsubst %,-l%,$(LIBS))
+CC = gcc
+STD = -std=c99
+WFLAGS = -Wall -Wextra -pedantic
+OPT = -O2
+INC = -I. -Iinclude
+LIB = utopia fract
 
-SCRIPT=build.sh
+SRCDIR = src
+TMPDIR = tmp
+BINDIR = bin
+LIBDIR = lib
 
-CFLAGS=$(STD) $(WFLAGS) $(OPT) $(IDIR)
+SCRIPT = build.sh
+
+SRC = $(wildcard $(SRCDIR)/*.c)
+OBJS = $(patsubst $(SRCDIR)/%.c,$(TMPDIR)/%.o,$(SRC))
+LIBS = $(patsubst %,$(LIBDIR)/lib%.a,$(LIB))
+DLIB = $(patsubst %, -L%, $(LIBDIR))
+DLIB += $(patsubst %, -l%, $(LIB))
 
 OS=$(shell uname -s)
 ifeq ($(OS),Darwin)
-	OSFLAGS=-dynamiclib
-	LIB=$(NAME).dylib
+	DLIB += -dynamiclib
+	SUFFIX = .dylib
 else
-	OSFLAGS=-lm -shared -fPIC
-	LIB=$(NAME).so
+	DLIB += -lm -shared -fPIC
+	SUFFIX = .so
 endif
 
-static: $(SRC)
-	$(CC) $(CFLAGS) -c $^ && ar -cr $(NAME).a *.o && rm *.o
+TARGET = $(BINDIR)/$(NAME)
+LIBNAME = $(TARGET)$(SUFFIX)
 
-$(LDIR): 
-	@[ -d "$(LDIR)" ] || mkdir $(LDIR) && echo "mkdir $(LDIR)"
+CFLAGS = $(STD) $(WFLAGS) $(OPT) $(INC)
 
-$(LDIR)%.a: %
-	cd $^ && make && mv $@ ../
+$(TARGET).a: $(BINDIR) $(OBJS)
+	ar -cr $@ $(OBJS)
 
-$(LPATHS): $(LDIR) $(LSTATIC)
-	mv *.a $(LDIR)/
+.PHONY: shared all clean install uninstall
 
-shared: $(SRC) $(LPATHS)
-	$(CC) -o $(LIB) $(SRC) $(CFLAGS) $(LFLAGS) $(OSFLAGS)
+shared: $(LIBNAME)
+
+all: $(LIBNAME) $(TARGET).a
+
+$(LIBNAME): $(BINDIR) $(OBJS) $(LIBS)
+	$(CC) $(CFLAGS) $(DLIB) -o $@ $(OBJS)
+
+$(LIBDIR)/lib%.a: %
+	cd $^ && $(MAKE) && mv $(BINDIR)/* ../$(LIBDIR)
+
+$(LIBS): | $(LIBDIR)
+
+$(TMPDIR)/%.o: $(SRCDIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJS): | $(TMPDIR)
+
+$(TMPDIR):
+	mkdir -p $@
+
+$(BINDIR):
+	mkdir -p $@
+
+$(LIBDIR):
+	mkdir -p $@
 
 clean: $(SCRIPT)
 	./$^ $@
@@ -51,4 +75,3 @@ install: $(SCRIPT)
 
 uninstall: $(SCRIPT)
 	./$^ $@
-

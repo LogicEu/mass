@@ -6,9 +6,9 @@ Mesh3D mesh3D_create(void)
 {
     Mesh3D mesh;
 
-    mesh.vertices = array_create(sizeof(vec3));
-    mesh.normals = array_create(sizeof(vec3));
-    mesh.uvs = array_create(sizeof(vec2));
+    mesh.vertices = vector_create(sizeof(vec3));
+    mesh.normals = vector_create(sizeof(vec3));
+    mesh.uvs = vector_create(sizeof(vec2));
 
     return mesh;
 }
@@ -24,7 +24,7 @@ Mesh3D mesh3D_load(const char* path)
 Mesh3D mesh3D_shape_quad(const vec3 position)
 {   
     Mesh3D mesh = mesh3D_create();
-    array_resize(&mesh.vertices, 6);
+    vector_resize(&mesh.vertices, 6);
     mesh3D_push_quad_z(&mesh, position);
     return mesh;
 }
@@ -32,7 +32,7 @@ Mesh3D mesh3D_shape_quad(const vec3 position)
 Mesh3D mesh3D_shape_plane(const size_t width, const size_t height)
 {   
     Mesh3D mesh = mesh3D_create();
-    array_resize(&mesh.vertices, width * height * 6);
+    vector_resize(&mesh.vertices, width * height * 6);
 
     for (size_t x = 0; x < width; x++) {
         for (size_t z = 0; z < height; z++) {
@@ -46,7 +46,7 @@ Mesh3D mesh3D_shape_plane(const size_t width, const size_t height)
 Mesh3D mesh3D_shape_cube(const size_t size)
 {
     Mesh3D mesh = mesh3D_create();
-    array_resize(&mesh.vertices, 36 * size * size);
+    vector_resize(&mesh.vertices, 36 * size * size);
 
     mesh3D_push_plane_xyz(&mesh, size, size, vec3_new(0.0f, size, 0.0f), vec3_new(1.0f, 0.0f, 0.0f), vec3_new(0.0f, 0.0f, 1.0f)); //Up
     mesh3D_push_plane_xyz(&mesh, size, size, vec3_new(0.0f, 0.0f, 0.0f), vec3_new(0.0f, 0.0f, 1.0f), vec3_new(1.0f, 0.0f, 0.0f)); //Down
@@ -63,7 +63,7 @@ Mesh3D mesh3D_shape_cube(const size_t size)
 Mesh3D mesh3D_shape_hex(const vec3 size)
 {
     Mesh3D mesh = mesh3D_create();
-    array_resize(&mesh.vertices, 36);
+    vector_resize(&mesh.vertices, 36);
 
     mesh3D_push_plane_xyz(&mesh, 1, 1, vec3_new(0.0f, size.y, 0.0f), vec3_new(size.x, 0.0f, 0.0f), vec3_new(0.0f, 0.0f, size.z)); //Up
     mesh3D_push_plane_xyz(&mesh, 1, 1, vec3_new(0.0f, 0.0f, 0.0f), vec3_new(0.0f, 0.0f, size.z), vec3_new(size.x, 0.0f, 0.0f)); //Down
@@ -81,7 +81,7 @@ Mesh3D mesh3D_shape_sphere(const size_t size)
 {
     Mesh3D mesh = mesh3D_shape_cube(size);
     mesh3D_normalize(&mesh);
-    mesh3D_normals_get_face(&mesh);
+    mesh3D_normalize_faces(&mesh);
     return mesh;
 }
 
@@ -94,14 +94,14 @@ void mesh3D_save(const Mesh3D* mesh, const char* path)
 
 void mesh3D_save_quick(const Mesh3D* mesh, const char* path)
 {
-    return mesh3D_save_wavefront(mesh, path);
+    mesh3D_save_wavefront(mesh, path);
 }
 
 void mesh3D_free(Mesh3D* mesh)
 {
-    array_free(&mesh->vertices);
-    array_free(&mesh->normals);
-    array_free(&mesh->uvs);
+    vector_free(&mesh->vertices);
+    vector_free(&mesh->normals);
+    vector_free(&mesh->uvs);
 }
 
 /* --- Procedural Opertations --- */
@@ -116,7 +116,7 @@ void mesh3D_push_quad_z(Mesh3D* mesh, const vec3 position)
             quad[i].y + position.z
         };
 
-        array_push(&mesh->vertices, &pos);
+        vector_push(&mesh->vertices, &pos);
     }
 }
 
@@ -130,7 +130,7 @@ void mesh3D_push_quad_xyz(Mesh3D* mesh, const vec3 position, const vec3 xvec, co
             quad[i].x * xvec.z + quad[i].y * yvec.z + position.z
         };
         
-        array_push(&mesh->vertices, &pos);
+        vector_push(&mesh->vertices, &pos);
     }
 }
 
@@ -159,9 +159,9 @@ void mesh3D_push_plane_xyz(Mesh3D* mesh, const size_t xsize, const size_t ysize,
     }
 }
 
-void mesh3D_normals_get_face(Mesh3D* mesh)
+void mesh3D_normalize_faces(Mesh3D* mesh)
 {
-    array_clear(&mesh->normals);
+    vector_clear(&mesh->normals);
 
     vec3* pos = mesh->vertices.data;
     
@@ -173,9 +173,9 @@ void mesh3D_normals_get_face(Mesh3D* mesh)
         vec3 n = _vec3_cross(vu, vv);
         n = vec3_norm(n);
         
-        array_push(&mesh->normals, &n);
-        array_push(&mesh->normals, &n);
-        array_push(&mesh->normals, &n);
+        vector_push(&mesh->normals, &n);
+        vector_push(&mesh->normals, &n);
+        vector_push(&mesh->normals, &n);
     }
 }
 
@@ -184,19 +184,19 @@ void mesh3D_merge(Mesh3D* restrict m1, Mesh3D* restrict m2)
     const size_t vsize = m2->vertices.size;
     vec3* v = m2->vertices.data;
     for (size_t i = 0; i < vsize; i++) {
-        array_push(&m1->vertices, v + i);
+        vector_push(&m1->vertices, v + i);
     }
 
     const size_t nsize = m2->normals.size;
     vec3* n = m2->vertices.data;
     for (size_t i = 0; i < nsize; i++) {
-        array_push(&m1->normals, n + i);
+        vector_push(&m1->normals, n + i);
     }
 
     const size_t uvsize = m2->uvs.size;
     vec2* uv = m2->vertices.data;
     for (size_t i = 0; i < uvsize; i++) {
-        array_push(&m1->vertices, uv + i);
+        vector_push(&m1->vertices, uv + i);
     }
 
     mesh3D_free(m2);
@@ -227,4 +227,17 @@ void mesh3D_normalize(Mesh3D* mesh)
     for (size_t i = 0; i < vsize; i++) {
         v[i] = vec3_norm(v[i]);
     }
+}
+
+Mesh3D imesh3D_to_mesh3D(const iMesh3D* mesh)
+{
+    Mesh3D m;
+    size_t vertcount, uvcount, normcount;
+    void* vertdata = table_decompress(&mesh->vertices, &vertcount);
+    void* normdata = table_decompress(&mesh->normals, &normcount);
+    void* uvdata = table_decompress(&mesh->uvs, &uvcount);
+    m.vertices = vector_wrap(vertdata, sizeof(vec3), vertcount);
+    m.normals = vector_wrap(normdata, sizeof(vec3), normcount);
+    m.uvs = vector_wrap(uvdata, sizeof(vec2), uvcount);
+    return m;
 }

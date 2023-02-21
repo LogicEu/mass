@@ -1,6 +1,6 @@
 [submodule "utopia"]
 	path = utopia
-	url = git@github.com:LogicEu/utopia.git
+	url = https://github.com/LogicEu/utopia.git
 [submodule "fract"]
 	path = fract
-	url = git@github.com:LogicEu/fract.git
+	url = https://github.com/LogicEu/fract.git

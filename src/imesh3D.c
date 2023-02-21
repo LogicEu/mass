@@ -74,13 +74,13 @@ iMesh3D imesh3D_shape_sphere(const size_t size)
 {
     iMesh3D mesh = imesh3D_shape_cube(size);
     imesh3D_normalize(&mesh);
-    imesh3D_normals_get_face(&mesh);
+    imesh3D_normalize_faces(&mesh);
     return mesh;
 }
 
 void imesh3D_save(const iMesh3D* mesh, const char* path)
 {
-    return imesh3D_save_wavefront(mesh, path);
+    imesh3D_save_wavefront(mesh, path);
 }
 
 void imesh3D_free(iMesh3D* mesh)
@@ -145,7 +145,7 @@ void imesh3D_push_plane_xyz(iMesh3D* mesh, const size_t xsize, const size_t ysiz
     }
 }
 
-void imesh3D_normals_get_face(iMesh3D* mesh)
+void imesh3D_normalize_faces(iMesh3D* mesh)
 {
     table_free(&mesh->normals);
 
@@ -222,4 +222,13 @@ void imesh3D_normalize(iMesh3D* mesh)
     for (size_t i = 0; i < vsize; i++) {
         v[i] = vec3_norm(v[i]);
     }
+}
+
+iMesh3D mesh3D_to_imesh3D(const Mesh3D* mesh)
+{
+    iMesh3D m;
+    m.vertices = table_compress(mesh->vertices.data, mesh->vertices.bytes, mesh->vertices.size);
+    m.normals = table_compress(mesh->normals.data, mesh->normals.bytes, mesh->normals.size);
+    m.uvs = table_compress(mesh->uvs.data, mesh->uvs.bytes, mesh->uvs.size);
+    return m;
 }
